@@ -1,0 +1,11 @@
+*.suo
+*.user
+/.idea
+/dist
+/.vs
+/.tmp
+/node_modules
+/.tscache
+/demo/demo.js
+/demo/demo.js.map
+/coverage

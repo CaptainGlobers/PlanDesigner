@@ -1,0 +1,13 @@
+{
+  "name": "start-ts",
+  "version": "0.0.1",
+  "description": "Empty TypeScript project",
+  "devDependencies": {
+    "grunt": "1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-ts": "^6.0.0-beta.17",
+    "load-grunt-tasks": "^3.5.2",
+    "systemjs": "0.19.45",
+    "typescript": "^2.6.2"
+  }
+}
