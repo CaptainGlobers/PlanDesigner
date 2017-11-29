@@ -14,7 +14,7 @@ module.exports = function(grunt) {
 				module: "system",
 				target: "es5",
 				moduleResolution: "node",
-				noImplicitAny: true,
+				noImplicitAny: false,
 				noUnusedLocals: true,
 				noImplicitReturns: true,
 				failOnTypeErrors: true,
