@@ -1,0 +1,178 @@
+import { IGroup, IPath, Point, Group, IPoint, IRaster, Raster, PointText, Color, Path, Size } from '../Primitive/Primitive';
+import { GraphicsSettings } from './GraphicsSettings';
+
+export class MenuDesigner {
+
+    private _menuGroup: IGroup;
+
+    public drawMenu(count: number, width: number, hight: number, graphicsSettings: GraphicsSettings): Array<IGroup> {
+        const menu: IPath = Path.Rectangle(new Point(0, 0), new Point(width, 40));
+        menu.fillColor = '#f6f0e7';
+
+        // TODO: del dependencies
+        this._menuGroup = new Group([menu]);
+        // TODO: del dependencies
+        graphicsSettings.menu = menu;
+
+        return MenuDesigner.drawMenuItemInner(count, width, hight, menu, this._menuGroup);
+    }
+
+    private static drawMenuItemInner(count: number, width: number, hight: number, menu: any, menuGroup: IGroup): Array<IGroup> {
+        const menuItem: Array<IGroup> = new Array;
+        const point1: IPoint = new Point(0, 0);
+        const margin: number = 5;
+        const heightItem: number = hight - margin;
+        const widthItem: number = 100;
+
+        menuItem.push(menuGroup);
+
+        const fillLayer: IPath = Path.Rectangle(new Point(0, 0), new Point(width, 40));
+        fillLayer.fillColor = '#f6f0e7';
+        fillLayer.insertAbove(menuGroup);
+
+        let i: number;
+        for (i = 0; i < count; i++) {
+            const icon: IRaster = Raster.create('icon/menu' + i + '.png', new Point(point1.x + 18, point1.y + 18), 0.25);
+            const point2: IPoint = new Point(point1.x + widthItem, point1.y + heightItem);
+            const button: IPath = Path.Rectangle(point1, point2);
+            button.fillColor = '#f6f0e7';
+            const outSelect: IPath =
+                Path.Rectangle(point1, new Point(point1.x + widthItem, point1.y + heightItem + 4 * 20));
+            const text: PointText =
+                PointText.create(new Point(point1.x + 35, point1.y + 22), 'left', '#956429', ``);
+            const subMenu: IGroup =
+                (i == 2) ? MenuDesigner.drawSubMenu(5, point1.x, 250) : MenuDesigner.drawSubMenu(5, point1.x);
+            subMenu.visible = false;
+
+            const group = new Group([outSelect, button, text, subMenu, icon]);
+
+            group.onMouseEnter = function (event) {
+                this.children[1].fillColor = '#ffbb80';
+                this.children[3].visible = true;
+                document.body.style.cursor = "pointer";
+                this.children[0].fillColor = new Color(0, 0, 0, 0.0);
+            }
+
+            group.onMouseLeave = function (event) {
+                this.children[1].fillColor = '#f6f0e7';
+                this.children[3].visible = false;
+                document.body.style.cursor = "default";
+                this.children[0].fillColor = null;
+            }
+            menuItem.push(group);
+            point1.x = point1.x + margin + widthItem;
+        }
+
+        return menuItem;
+    }
+
+    public drawLeftMenu(count: number): Array<IGroup> {
+        return MenuDesigner.drawLeftMenuInner(count, this._menuGroup);
+    }
+
+    private static drawLeftMenuInner(count: number, menuGroup: IGroup): Array<IGroup> {
+        const menu: Array<IGroup> = new Array;
+        const point1: IPoint = new Point(0, 120);
+        const margin: number = 0;
+        const heightItem: number = 40;
+        const widthItem: number = 40;
+
+        for (let i: number = 0; i < count; i++) {
+            const icon: IRaster =
+                Raster.create('icon/leftMenu' + i + '.png', new Point(point1.x + 20, point1.y + 20), 0.25);
+
+            const group = MenuDesigner.drawMenuItem(point1, widthItem, heightItem, icon);
+            group.onMouseEnter = function (event) {
+                this.children[0].fillColor = '#ffbb80';
+                document.body.style.cursor = "pointer";
+            }
+            group.onMouseLeave = function (event) {
+                this.children[0].fillColor = '#f6f0e7';
+                document.body.style.cursor = "default";
+            }
+
+            group.insertAbove(menuGroup);
+            menu.push(group);
+            point1.y = point1.y + margin + heightItem;
+        }
+        return menu;
+    }
+
+    public static drawMenuItem(point1: IPoint, width: number, height: number, icon?: IRaster): IGroup {
+        const point2: IPoint = new Point(point1.x + width, point1.y + height);
+        const button: IPath = Path.Rectangle(point1, point2);
+        button.fillColor = '#f6f0e7';
+
+        let text: PointText;
+        if (icon) {
+            text = PointText.create(new Point(point1.x + 20, point1.y + 27), 'center', '#956429', '', 24);
+        } else {
+            text = PointText.create(new Point(point1.x + 10, point1.y + 13), 'left', '#956429', ``);
+        }
+
+        return icon ? new Group([button, icon, text]) : new Group([button, text]);
+    }
+
+    public static drawSubMenu(count: number, positionStartX: number, widthItem: number = 120): IGroup {
+        const point1: IPoint = new Point(positionStartX, 40);
+        const heightItem: number = 20
+
+        const subMenuItems: Array<IGroup> = new Array;
+        for (let i: number = 0; i < count; i++) {
+            const subMenuItem: IGroup = MenuDesigner.drawMenuItem(point1, widthItem, heightItem);
+            subMenuItem.onMouseEnter = function (event) {
+                this.children[0].fillColor = '#ffbb80';
+            }
+
+            subMenuItem.onMouseLeave = function (event) {
+                this.children[0].fillColor = '#f6f0e7';
+            }
+
+            subMenuItems.push(subMenuItem);
+            point1.y = point1.y + heightItem;
+        }
+
+        const subMenu: IGroup = new Group();
+        subMenu.addChildren(subMenuItems);
+        return subMenu;
+    }
+
+    public static drawStartMenu(center: IPoint): IGroup {
+        const width: number = 400;
+        const height: number = 200;
+
+        const rect: IPath =
+            Path.Rectangle(new Point(center.x - width / 2, center.y - height / 2), new Size(width, height));
+        rect.fillColor = '#f6f0e7';
+
+        const icon1: IRaster =
+            Raster.create('icon/start0.png', new Point(center.x - width / 4, center.y + 10), 0.5, 0.5);
+        const icon2: IRaster =
+            Raster.create('icon/start1.png', new Point(center.x + width / 4, center.y + 10), 0.6, 0.5);
+
+        const iconMouseEnterHandler: Function = (elem) => {
+            elem.opacity = 1;
+            document.body.style.cursor = "pointer";
+        }
+
+        const iconMouseLeaveHandler: Function = (elem) => {
+            elem.opacity = 0.5;
+            document.body.style.cursor = "default";
+        }
+
+        icon2.onMouseEnter = () => iconMouseEnterHandler(icon2);
+        icon2.onMouseLeave = () => iconMouseLeaveHandler(icon2);
+        icon1.onMouseEnter = () => iconMouseEnterHandler(icon1);
+        icon1.onMouseLeave = () => iconMouseLeaveHandler(icon1);
+
+        const text1 = PointText.create(
+            new Point(center.x - width / 4, center.y - height / 2 + 30), 'center', '#956429', '', 20
+        );
+
+        const text2 = PointText.create(
+            new Point(center.x + width / 4, center.y - height / 2 + 30), 'center', '#956429', '', 20
+        );
+
+        return new Group([rect, text1, icon1, text2, icon2]);
+    }
+}
