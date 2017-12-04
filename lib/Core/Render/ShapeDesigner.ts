@@ -1,9 +1,9 @@
-import { IPoint, IGroup, IPath, Group, Point, Color, IColor, IPointText, PointText, IRaster, Raster } from '../Primitive/Primitive';
+import { IPoint, IGroup, IPath, Group, Point, IColor, IPointText, PointText, IRaster, Raster } from '../Primitive/Primitive';
 import { GraphicsSettings } from './GraphicsSettings';
 import { MathCalc } from '../MathCalc';
 import { IShape } from '../Shapes/IShape';
 import { ShapeDesignerHelper } from './ShapeDesignerHelper';
-import { ColorConfig } from '../../ColorConfig';
+import { ColorConfig } from './ColorConfig';
 import { ShapeBack } from '../Shapes/ShapeBack';
 
 export class ShapeDesigner {
@@ -21,25 +21,25 @@ export class ShapeDesigner {
         return MathCalc.getPosition(x, y, this.zoom, this.center);
     }
 
-    public drawGrid(shape: IShape, winWidth: number, winHeight: number, offsetXExt: number, offsetYExt: number) {
-        const offsetX: number = offsetXExt - Math.round(winWidth / 2) - 3;
-        const offsetY: number = offsetYExt - Math.round(winHeight / 2) - 5;
+    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, windowOffsetX: number, windowOffsetY: number) {
+        const offsetX: number = windowOffsetX - Math.round(windowWidth / 2) - 3;
+        const offsetY: number = windowOffsetY - Math.round(windowHeight / 2) - 5;
         const high: number = (this.zoom > 1.5) ? 50 : 100;
         const width: number = (this.zoom > 1.5) ? 50 : 100;
-        const pool: Array<IPath> = new Array;
-        const widthElement = Math.round(2 * winWidth / width);
-        const highElement = Math.round(2 * winHeight / high);
+        const pool: Array<IPath> = [];
+        const widthElement = Math.round(2 * windowWidth / width);
+        const highElement = Math.round(2 * windowHeight / high);
         const widthLength = widthElement * width;
         const highLength = highElement * high;
 
         for (let i: number = 0; i <= widthElement; i++) {
-            pool.push(ShapeDesignerHelper.createPath(
+            pool.push(ShapeDesignerHelper.drawGridLine(
                 this.newPosition(i * width + 0.5 + offsetX, + 0.5 + offsetY),
                 this.newPosition(i * width + 0.5 + offsetX, highLength + 0.5 + offsetY)
             ));
         }
         for (let i: number = 0; i <= highElement; i++) {
-            pool.push(ShapeDesignerHelper.createPath(
+            pool.push(ShapeDesignerHelper.drawGridLine(
                 this.newPosition(0.5 + offsetX, i * high + 0.5 + offsetY),
                 this.newPosition(widthLength + 0.5 + offsetX, i * high + 0.5 + offsetY)
             ));
@@ -55,11 +55,11 @@ export class ShapeDesigner {
     }
 
     public drawControl(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawSquare(shape, offsetX, offsetY, 8, 'yellow', 'lightblue', 'yellow');
+        this.drawSquare(shape, offsetX, offsetY, 8, ColorConfig.control);
     }
 
     public drawColumn(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawSquare(shape, offsetX, offsetY, 20, ColorConfig.column, new Color(0, 0.45, 1, 0.5), new Color(1, 0.45, 0, 0.5));
+        this.drawSquare(shape, offsetX, offsetY, 20, ColorConfig.column);
     }
 
     private drawSquare(
@@ -67,16 +67,14 @@ export class ShapeDesigner {
         offsetX: number,
         offsetY: number,
         size: number,
-        rectColor: IColor | string,
-        colorEnter: IColor | string,
-        colorLeave: IColor | string
+        fillColor: IColor | string
     ): void {
         const point1: IPoint = this.newPosition(shape.point1.x + offsetX, shape.point1.y + offsetY);
         const width: number = size * this.zoom;
         const length: number = size * this.zoom;
 
         const rect: IPath =
-            ShapeDesignerHelper.createRectangle(point1, width, length, 'black', 'rect', rectColor, 0);
+            ShapeDesignerHelper.createRectangle(point1, width, length, fillColor, 0);
 
         if (shape.renderObject && shape.renderObject.children[0]) {
             rect.insertBelow(shape.renderObject);
@@ -84,7 +82,7 @@ export class ShapeDesigner {
             shape.renderObject.addChild(rect);
         } else {
             shape.renderObject =
-                ShapeDesignerHelper.createRenderObject([rect], colorEnter, colorLeave, this.menu);
+                ShapeDesignerHelper.createRenderObject([rect], this.menu, fillColor);
         }
     }
 
@@ -96,10 +94,10 @@ export class ShapeDesigner {
         const length: number = point2.getDistance(point1, false);
 
         const rect: IPath =
-            ShapeDesignerHelper.createRectangle(point1, width, length, 'black', 'rect', color, vector.angle - 90, true);
+            ShapeDesignerHelper.createRectangle(point1, width, length, color, vector.angle - 90, true);
 
         const text: IPointText =
-            PointText.create(new Point(rect.position.x, rect.position.y + width / 3), 'center', 'black', 'Wall', 20);
+            PointText.create(new Point(rect.position.x, rect.position.y + width / 3), 'center', ColorConfig.black, 'Wall', 20);
         text.fontWeight = 'bold';
         text.visible = false;
 
@@ -111,7 +109,7 @@ export class ShapeDesigner {
         }
 
         shape.renderObject.onMouseEnter = () => {
-            shape.renderObject.children[0].fillColor = new Color(0, 0.45, 1, 0.5);
+            shape.renderObject.children[0].fillColor = ColorConfig.mouseEnter;
             (shape.renderObject.children[1] as IPointText).content = ' ' + Math.round(MathCalc.getShapeLength(shape));
             shape.renderObject.children[1].visible = true;
         };
@@ -130,17 +128,17 @@ export class ShapeDesigner {
         const length: number = shape.width / 10 * this.zoom;
 
         const rect: IPath =
-            ShapeDesignerHelper.createRectangle(point1, width, length, 'black', 'rect', ColorConfig.wallPlace, vector.angle - 90);
+            ShapeDesignerHelper.createRectangle(point1, width, length, ColorConfig.black, vector.angle - 90);
 
         if (color2) {
             const smallRect: IPath =
-                ShapeDesignerHelper.createRectangle(point1, smallWidth, length, 'black', 'smallrect', color2, vector.angle - 90);
+                ShapeDesignerHelper.createRectangle(point1, smallWidth, length, color2, vector.angle - 90);
 
             if (shape.renderObject && shape.renderObject.children[0]) {
                 ShapeDesignerHelper.addChildren(shape, smallRect, rect);
             } else {
                 shape.renderObject =
-                    ShapeDesignerHelper.createRenderObject([rect, smallRect], new Color(0, 0.45, 1, 0.5), 'black', this.menu, true);
+                    ShapeDesignerHelper.createRenderObject([rect, smallRect], this.menu);
             }
         } else {
             if (shape.renderObject && shape.renderObject.children[0]) {
@@ -149,7 +147,7 @@ export class ShapeDesigner {
                 shape.renderObject.addChild(rect);
             } else {
                 shape.renderObject =
-                    ShapeDesignerHelper.createRenderObject([rect], new Color(0, 0.45, 1, 0.5), 'black', this.menu, true);
+                    ShapeDesignerHelper.createRenderObject([rect], this.menu);
             }
         }
     }
@@ -170,7 +168,7 @@ export class ShapeDesigner {
         }
     }
 
-    //------------------------------
+    // ------------------------------
     private get zoom(): number {
         return this._graphicsSettings.zoom;
     }

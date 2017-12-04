@@ -1,4 +1,4 @@
-﻿import { IPoint, Point, IPath, Size, Color, IGroup, Path } from '../Primitive/Primitive';
+﻿import { IPoint, Point, IPath, Size, IGroup, Path } from '../Primitive/Primitive';
 import { IShape } from '../Shapes/IShape';
 import { RenderApi } from './RenderApi';
 import { ShapeGrid } from '../Shapes/ShapeGrid';
@@ -9,6 +9,7 @@ import { StageMoveController } from '../StageMoveController';
 import { GraphicsSettings } from './GraphicsSettings';
 import { Shape } from '../Shapes/Shape';
 import { ShapeDesignerHelper } from './ShapeDesignerHelper';
+import { ColorConfig } from './ColorConfig';
 
 export class Render {
     private _canvas: HTMLCanvasElement;
@@ -49,7 +50,7 @@ export class Render {
         this._renderApi = new RenderApi(this._graphicsSettings, this._grid);
         this._renderApi.drawGrid(this._grid, this._canvas.width, this._canvas.height, 0, 0);
 
-        this._dialog = new Dialog(this._graphicsSettings.cx, this);
+        this._dialog = new Dialog(this._graphicsSettings.centerX, this);
 
         this._events = new Events(this);
         this._events.addMouseMoveListener((e: any) => this.moveShapeListener(e));
@@ -243,7 +244,7 @@ export class Render {
             backShapes.forEach((shape: IShape) => {
                 if (shape.type === 1 || shape.type === 2 || shape.type === 3) {
                     this._renderApi.renderShapeBack(shape, this._offsetX, this._offsetY);
-                    shape.renderObject.fillColor = new Color(0, 0, 0, 0);
+                    shape.renderObject.fillColor = ColorConfig.transparent;
                     shape.renderObject.insertBelow(this._grid.renderObject);
                     shape.renderObject.onMouseEnter = null;
                     shape.renderObject.onMouseLeave = null;
@@ -448,7 +449,7 @@ export class Render {
             this._events.removeMouseDownListener(onMouseDown);
             this._events.removeMouseMoveListener(onMouseMove);
             this._selectedMode = true;
-        }
+        };
 
         if (this._drawWallMouseDownHandler || this._drawWallMouseMoveHandler) {
             cancelEvent();
@@ -509,7 +510,7 @@ export class Render {
             const point2: IPoint = this.getRound(event.point);
             if (startPoint) {
                 line = Path.Line(startPoint, point2);
-                line.strokeColor = '#0088ff';
+                line.strokeColor = ColorConfig.line;
                 line.strokeWidth = 2;
                 // TODO: find paper type
                 (line as any).moveAbove(this._grid.renderObject);
@@ -639,5 +640,5 @@ export class Render {
         return this._renderApi.drawStartMenu();
     }
 
-    //private _dialogHelper: HTMLElement;
+    // private _dialogHelper: HTMLElement;
 }

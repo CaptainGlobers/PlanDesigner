@@ -6,7 +6,7 @@ export class GraphicsSettings {
         this._center = center;
     }
 
-    private _menu: IPath = null;
+    private _menu: IPath;
     public get menu(): IPath {
         return this._menu;
     }
@@ -28,11 +28,11 @@ export class GraphicsSettings {
         return this._center;
     }
 
-    public get cx() {
+    public get centerX(): number {
         return this._center.x;
     }
 
-    public get cy() {
+    public get centerY(): number {
         return this._center.y;
     }
 

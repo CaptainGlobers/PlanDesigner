@@ -1,4 +1,5 @@
-import { IGroup, IPath, Point, Group, IPoint, IRaster, Raster, PointText, Color, Path, Size } from '../Primitive/Primitive';
+import { ColorConfig } from './ColorConfig';
+import { IGroup, IPath, Point, Group, IPoint, IRaster, Raster, PointText, Path, Size } from '../Primitive/Primitive';
 import { GraphicsSettings } from './GraphicsSettings';
 
 export class MenuDesigner {
@@ -7,7 +8,7 @@ export class MenuDesigner {
 
     public drawMenu(count: number, width: number, hight: number, graphicsSettings: GraphicsSettings): Array<IGroup> {
         const menu: IPath = Path.Rectangle(new Point(0, 0), new Point(width, 40));
-        menu.fillColor = '#f6f0e7';
+        menu.fillColor = ColorConfig.button;
 
         // TODO: del dependencies
         this._menuGroup = new Group([menu]);
@@ -18,7 +19,7 @@ export class MenuDesigner {
     }
 
     private static drawMenuItemInner(count: number, width: number, hight: number, menu: any, menuGroup: IGroup): Array<IGroup> {
-        const menuItem: Array<IGroup> = new Array;
+        const menuItem: Array<IGroup> = [];
         const point1: IPoint = new Point(0, 0);
         const margin: number = 5;
         const heightItem: number = hight - margin;
@@ -27,7 +28,7 @@ export class MenuDesigner {
         menuItem.push(menuGroup);
 
         const fillLayer: IPath = Path.Rectangle(new Point(0, 0), new Point(width, 40));
-        fillLayer.fillColor = '#f6f0e7';
+        fillLayer.fillColor = ColorConfig.button;
         fillLayer.insertAbove(menuGroup);
 
         let i: number;
@@ -35,11 +36,11 @@ export class MenuDesigner {
             const icon: IRaster = Raster.create('icon/menu' + i + '.png', new Point(point1.x + 18, point1.y + 18), 0.25);
             const point2: IPoint = new Point(point1.x + widthItem, point1.y + heightItem);
             const button: IPath = Path.Rectangle(point1, point2);
-            button.fillColor = '#f6f0e7';
+            button.fillColor = ColorConfig.button;
             const outSelect: IPath =
                 Path.Rectangle(point1, new Point(point1.x + widthItem, point1.y + heightItem + 4 * 20));
             const text: PointText =
-                PointText.create(new Point(point1.x + 35, point1.y + 22), 'left', '#956429', ``);
+                PointText.create(new Point(point1.x + 35, point1.y + 22), 'left', ColorConfig.menuText, ``);
             const subMenu: IGroup =
                 (i == 2) ? MenuDesigner.drawSubMenu(5, point1.x, 250) : MenuDesigner.drawSubMenu(5, point1.x);
             subMenu.visible = false;
@@ -47,14 +48,14 @@ export class MenuDesigner {
             const group = new Group([outSelect, button, text, subMenu, icon]);
 
             group.onMouseEnter = function (event) {
-                this.children[1].fillColor = '#ffbb80';
+                this.children[1].fillColor = ColorConfig.menuMouseEnter;
                 this.children[3].visible = true;
                 document.body.style.cursor = "pointer";
-                this.children[0].fillColor = new Color(0, 0, 0, 0.0);
+                this.children[0].fillColor = ColorConfig.transparent;
             }
 
             group.onMouseLeave = function (event) {
-                this.children[1].fillColor = '#f6f0e7';
+                this.children[1].fillColor = ColorConfig.button;
                 this.children[3].visible = false;
                 document.body.style.cursor = "default";
                 this.children[0].fillColor = null;
@@ -71,7 +72,7 @@ export class MenuDesigner {
     }
 
     private static drawLeftMenuInner(count: number, menuGroup: IGroup): Array<IGroup> {
-        const menu: Array<IGroup> = new Array;
+        const menu: Array<IGroup> = [];
         const point1: IPoint = new Point(0, 120);
         const margin: number = 0;
         const heightItem: number = 40;
@@ -83,11 +84,11 @@ export class MenuDesigner {
 
             const group = MenuDesigner.drawMenuItem(point1, widthItem, heightItem, icon);
             group.onMouseEnter = function (event) {
-                this.children[0].fillColor = '#ffbb80';
+                this.children[0].fillColor = ColorConfig.menuMouseEnter;
                 document.body.style.cursor = "pointer";
             }
             group.onMouseLeave = function (event) {
-                this.children[0].fillColor = '#f6f0e7';
+                this.children[0].fillColor = ColorConfig.button;
                 document.body.style.cursor = "default";
             }
 
@@ -101,13 +102,13 @@ export class MenuDesigner {
     public static drawMenuItem(point1: IPoint, width: number, height: number, icon?: IRaster): IGroup {
         const point2: IPoint = new Point(point1.x + width, point1.y + height);
         const button: IPath = Path.Rectangle(point1, point2);
-        button.fillColor = '#f6f0e7';
+        button.fillColor = ColorConfig.button;
 
         let text: PointText;
         if (icon) {
-            text = PointText.create(new Point(point1.x + 20, point1.y + 27), 'center', '#956429', '', 24);
+            text = PointText.create(new Point(point1.x + 20, point1.y + 27), 'center', ColorConfig.menuText, '', 24);
         } else {
-            text = PointText.create(new Point(point1.x + 10, point1.y + 13), 'left', '#956429', ``);
+            text = PointText.create(new Point(point1.x + 10, point1.y + 13), 'left', ColorConfig.menuText, ``);
         }
 
         return icon ? new Group([button, icon, text]) : new Group([button, text]);
@@ -117,15 +118,15 @@ export class MenuDesigner {
         const point1: IPoint = new Point(positionStartX, 40);
         const heightItem: number = 20
 
-        const subMenuItems: Array<IGroup> = new Array;
+        const subMenuItems: Array<IGroup> = [];
         for (let i: number = 0; i < count; i++) {
             const subMenuItem: IGroup = MenuDesigner.drawMenuItem(point1, widthItem, heightItem);
             subMenuItem.onMouseEnter = function (event) {
-                this.children[0].fillColor = '#ffbb80';
+                this.children[0].fillColor = ColorConfig.menuMouseEnter;
             }
 
             subMenuItem.onMouseLeave = function (event) {
-                this.children[0].fillColor = '#f6f0e7';
+                this.children[0].fillColor = ColorConfig.button;
             }
 
             subMenuItems.push(subMenuItem);
@@ -143,7 +144,7 @@ export class MenuDesigner {
 
         const rect: IPath =
             Path.Rectangle(new Point(center.x - width / 2, center.y - height / 2), new Size(width, height));
-        rect.fillColor = '#f6f0e7';
+        rect.fillColor = ColorConfig.button;
 
         const icon1: IRaster =
             Raster.create('icon/start0.png', new Point(center.x - width / 4, center.y + 10), 0.5, 0.5);
@@ -166,11 +167,11 @@ export class MenuDesigner {
         icon1.onMouseLeave = () => iconMouseLeaveHandler(icon1);
 
         const text1 = PointText.create(
-            new Point(center.x - width / 4, center.y - height / 2 + 30), 'center', '#956429', '', 20
+            new Point(center.x - width / 4, center.y - height / 2 + 30), 'center', ColorConfig.menuText, '', 20
         );
 
         const text2 = PointText.create(
-            new Point(center.x + width / 4, center.y - height / 2 + 30), 'center', '#956429', '', 20
+            new Point(center.x + width / 4, center.y - height / 2 + 30), 'center', ColorConfig.menuText, '', 20
         );
 
         return new Group([rect, text1, icon1, text2, icon2]);

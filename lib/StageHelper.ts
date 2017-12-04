@@ -4,7 +4,7 @@ import { DataConverter } from './Core/DataConverter/DataConverter';
 export class StageHelper {
     public static loadProject(onloadFn: (e: any) => void): void {
         const fileReader: FileReader = new FileReader();
-        fileReader.onload = (e: any) => onloadFn(e);//this.initProject(e.target.result);
+        fileReader.onload = (e: any) => onloadFn(e); //this.initProject(e.target.result);
         fileReader.onerror = (e: any) => alert('File not read ' + e.target.error.code);
 
         const input: HTMLInputElement = document.createElement('input');

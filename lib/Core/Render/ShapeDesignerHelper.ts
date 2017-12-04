@@ -1,6 +1,7 @@
-import { IPoint, Point, IPath, Size, IGroup, Group, Path, ISize, IItem } from '../Primitive/Primitive';
+import { IPoint, Point, IPath, Size, IGroup, Group, Path, ISize, IItem, IColor } from '../Primitive/Primitive';
 import { MathCalc } from '../MathCalc';
 import { IShape } from '../Shapes/IShape';
+import { ColorConfig } from './ColorConfig';
 
 export class ShapeDesignerHelper {
 
@@ -24,7 +25,7 @@ export class ShapeDesignerHelper {
     }
 
     public static createRectangle(
-        point: IPoint, width: number, length: number, strokeColor: string, name: string, fillColor, angle: number, notSetY?: boolean
+        point: IPoint, width: number, length: number, fillColor, angle: number, notSetY?: boolean
     ): IPath {
         const size: ISize = new Size(width, length);
         const rect: IPath = Path.Rectangle(point, size);
@@ -32,8 +33,7 @@ export class ShapeDesignerHelper {
         if (!notSetY) {
             rect.position.y -= length / 2;
         }
-        rect.strokeColor = strokeColor;
-        rect.name = name;
+        rect.strokeColor = ColorConfig.stroke;
         rect.fillColor = fillColor;
         if (angle) {
             rect.rotate(angle, point);
@@ -42,13 +42,13 @@ export class ShapeDesignerHelper {
         return rect;
     }
 
-    public static createRenderObject(items: Array<any>, colorEnter, colorLeave, menu, isStrokeColor?: boolean): IGroup {
+    public static createRenderObject(items: Array<any>, menu: IPath, colorLeave?: IColor | string): IGroup {
         const renderObject: IGroup = new Group(items);
-        if (isStrokeColor) {
-            renderObject.onMouseEnter = () => renderObject.strokeColor = colorEnter;
-            renderObject.onMouseLeave = () => renderObject.strokeColor = colorLeave;
+        if (!colorLeave) {
+            renderObject.onMouseEnter = () => renderObject.strokeColor = ColorConfig.mouseEnter;
+            renderObject.onMouseLeave = () => renderObject.strokeColor = ColorConfig.stroke;
         } else {
-            renderObject.onMouseEnter = () => renderObject.children[0].fillColor = colorEnter;
+            renderObject.onMouseEnter = () => renderObject.children[0].fillColor = ColorConfig.mouseEnter;
             renderObject.onMouseLeave = () => renderObject.children[0].fillColor = colorLeave;
         }
         if (menu) {
@@ -58,9 +58,9 @@ export class ShapeDesignerHelper {
         return renderObject;
     }
 
-    public static createPath(point1, point2): IPath {
+    public static drawGridLine(point1, point2): IPath {
         var myPath = new Path();
-        myPath.strokeColor = '#cccccc';
+        myPath.strokeColor = ColorConfig.gridLine;
         myPath.strokeWidth = 1;
         myPath.add(point1);
         myPath.add(point2);

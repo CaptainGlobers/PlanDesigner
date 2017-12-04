@@ -1,6 +1,7 @@
 ﻿import { Render } from '../Core/Render/Render';
 import { IShape } from '../Core/Shapes/IShape';
 import { MathCalc } from '../Core/MathCalc';
+import { ColorConfig } from '../Core/Render/ColorConfig';
 
 export class Dialog {
 
@@ -23,7 +24,7 @@ export class Dialog {
         div.style.position = 'fixed';
         div.style.top = '50px';
         div.style.left = this._centerX + 'px';
-        div.style.backgroundColor = '#f6f0e7';
+        div.style.backgroundColor = ColorConfig.button;
         div.style.padding = '8px';
         return div;
     }
@@ -38,7 +39,7 @@ export class Dialog {
         menuContainer.style.position = 'fixed';
         menuContainer.style.top = event.point.y + 'px';
         menuContainer.style.left = event.point.x + 'px';
-        menuContainer.style.backgroundColor = '#f6f0e7';
+        menuContainer.style.backgroundColor = ColorConfig.button;
         menuContainer.style.padding = '5px';
 
         menu.forEach((item: any) => {
@@ -51,7 +52,7 @@ export class Dialog {
                 this._render.reDraw();
             }
             text.onmouseenter = () => {
-                text.style.backgroundColor = '#C9AB8D';
+                text.style.backgroundColor = ColorConfig.dialog;
             }
             text.onmouseleave = () => {
                 text.style.backgroundColor = '';
@@ -147,7 +148,7 @@ export class Dialog {
         button.style.marginLeft = '60px';
         button.style.marginTop = '10px';
         button.style.display = 'inline-block';
-        button.style.backgroundColor = '#C9AB8D';
+        button.style.backgroundColor = ColorConfig.dialog;
         button.style.cursor = 'pointer';
 
         button.onclick = () => {
@@ -221,7 +222,7 @@ export class Dialog {
         button.style.marginLeft = '100px';
         button.style.marginTop = '10px';
         button.style.display = 'inline-block';
-        button.style.backgroundColor = '#C9AB8D';
+        button.style.backgroundColor = ColorConfig.dialog;
         button.style.cursor = 'pointer';
 
         button.onclick = () => {

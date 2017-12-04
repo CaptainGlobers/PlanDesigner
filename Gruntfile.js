@@ -1,29 +1,28 @@
 module.exports = function(grunt) {
 	require('load-grunt-tasks')(grunt);
+	grunt.loadNpmTasks("grunt-tslint");
 
     grunt.initConfig({
-		ts: {
-			default: {
+		ts: 
+		{
+			default: 
+			{
 				tsconfig: true
+			}
+		},
+		tslint:
+		{
+			options: {
+			  configuration: "tslint.json",
 			},
-			app: {
-			  src: ['demo/App.ts'],
-			  out: 'demo/demo.js',
-			  options: {
-				sourceMap: true,
-				module: "system",
-				target: "es5",
-				moduleResolution: "node",
-				noImplicitAny: false,
-				noUnusedLocals: true,
-				noImplicitReturns: true,
-				failOnTypeErrors: true,
-				stripInternal: true
-			  }
+			files: {
+			  src: [
+				'lib/**/*.ts',
+				'demo/**/*.ts'
+			  ]
 			}
 		}
 	});
 	
     grunt.registerTask('default', ['ts']);
-	grunt.registerTask('app', ['ts: app']);
 }

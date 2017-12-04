@@ -186,10 +186,10 @@ export class TopMenu {
                     const children: any = event.target.parent.children;
                     console.log('c ' + children.count, children);
                     if (children.count === 5) {
-                        children[1].fillColor = '#ffbb80';
+                        children[1].fillColor = ColorConfig.menuMouseEnter;
                         children[3].visible = true;
                         document.body.style.cursor = "pointer";
-                        children[0].fillColor = new Color(0, 0, 0, 0.0);
+                        children[0].fillColor = ColorConfig.transparent;
         
                         data = link.parseData(link);
                         document.body.appendChild(form);
@@ -200,7 +200,7 @@ export class TopMenu {
                     const children: any = event.target.parent.children;
                     console.log('c ' + children.count, children);
                     if (children.count === 5) {
-                        children[1].fillColor = '#f6f0e7';
+                        children[1].fillColor = ColorConfig.button;
                         children[3].visible = false;
                         document.body.style.cursor = "default";
                         children[0].fillColor = null;

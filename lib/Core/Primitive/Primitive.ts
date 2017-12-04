@@ -19,10 +19,10 @@ export class Color extends paper.Color { }
 
 export interface IPointText extends paper.PointText { }
 export class PointText extends paper.PointText {
-    public static create(point: Point, justification: string, fillColor: string, content: string, fontSize?: number): IPointText {
+    public static create(point: Point, justification: string, textColor: string | IColor, content: string, fontSize?: number): IPointText {
         const text: IPointText = new PointText(point);
         text.justification = justification;
-        text.fillColor = fillColor;
+        text.fillColor = textColor;
         text.content = content;
         if (fontSize) {
             text.fontSize = fontSize;

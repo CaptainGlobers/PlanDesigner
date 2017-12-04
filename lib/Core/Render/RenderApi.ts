@@ -5,7 +5,7 @@ import { MenuDesigner } from './MenuDesigner';
 import { ShapeDesigner } from './ShapeDesigner';
 import { IShape } from '../Shapes/IShape';
 import { ShapeBack } from '../Shapes/ShapeBack';
-import { ColorConfig } from '../../ColorConfig';
+import { ColorConfig } from './ColorConfig';
 
 export class RenderApi {
     private _grid: ShapeGrid;
@@ -28,8 +28,8 @@ export class RenderApi {
         return this._shapeDesigner.newPosition(x, y);
     }
 
-    public drawGrid(shape: IShape, winWidth: number, winHeight: number, offsetX: number, offsetY: number) {
-        this._shapeDesigner.drawGrid(shape, winWidth, winHeight, offsetX, offsetY);
+    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, offsetX: number, offsetY: number) {
+        this._shapeDesigner.drawGrid(shape, windowWidth, windowHeight, offsetX, offsetY);
     }
 
     public drawStartMenu(): IGroup {
@@ -156,7 +156,7 @@ export class RenderApi {
     }
 
     public drawDoorWay(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawShapeOnWall(shape, offsetX, offsetY, ColorConfig.door);
+        this.drawShapeOnWall(shape, offsetX, offsetY, ColorConfig.transparent);
     }
 
     public drawControl(shape: IShape, offsetX: number, offsetY: number): void {
