@@ -2,7 +2,7 @@
 import { IShape } from './IShape';
 
 export class ShapeBack implements IShape {
-    public type: number = null;
+    public type: number = undefined;
     public point1: IPoint;
     public point2: IPoint;
     public children: Array<IShape>;

@@ -1,6 +1,5 @@
 import { IPoint, IGroup } from '../Primitive/Primitive';
 
-
 export interface IShape {
     type: number;
     point1: IPoint;

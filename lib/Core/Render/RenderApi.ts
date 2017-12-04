@@ -1,4 +1,4 @@
-import { IPoint, IGroup, Path, Point, IColor } from '../Primitive/Primitive';
+import { IPoint, IGroup, Path, Point, IColor, IPath } from '../Primitive/Primitive';
 import { ShapeGrid } from '../Shapes/ShapeGrid';
 import { GraphicsSettings } from './GraphicsSettings';
 import { MenuDesigner } from './MenuDesigner';
@@ -28,7 +28,7 @@ export class RenderApi {
         return this._shapeDesigner.newPosition(x, y);
     }
 
-    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, offsetX: number, offsetY: number) {
+    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, offsetX: number, offsetY: number): void {
         this._shapeDesigner.drawGrid(shape, windowWidth, windowHeight, offsetX, offsetY);
     }
 
@@ -43,13 +43,10 @@ export class RenderApi {
     public drawLeftMenu(count: number): Array<IGroup> {
         return this._menuDesigner.drawLeftMenu(count);
     }
-    //--------------------------------------------------
+    // --------------------------------------------------
     public renderShape(shape: IShape, offsetX: number, offsetY: number, option: string): void;
     public renderShape(shape: IShape, offsetX: number, offsetY: number): void;
-    public renderShape(shape, offsetX, offsetY, option?) {
-        if (shape.point1 === null) {
-            debugger;
-        }
+    public renderShape(shape: IShape, offsetX: number, offsetY: number, option?: string): void {
         let param: string = option;
         if (shape.type === 1) {
             this.drawOuterWall(shape, offsetX, offsetY);
@@ -79,15 +76,15 @@ export class RenderApi {
             this.drawControl(shape, offsetX, offsetY);
         }
         if (shape.type === 13) {
-            this.drawBack(<ShapeBack>shape, offsetX, offsetY, this._grid);
+            this.drawBack(shape as ShapeBack, offsetX, offsetY, this._grid);
         }
         if (param !== 'noOne') {
             if (shape.children) {
                 shape.children.forEach((child: IShape) => {
 
                     if (child.type === 6 || child.type === 7 || child.type === 5) {
-                        const path = new Path([shape.point1, shape.point2]);
-                        // TODO: Bug path.getPointAt(child.offset) = null
+                        const path: IPath = new Path([shape.point1, shape.point2]);
+                        // TODO: Bug path.getPointAt(child.offset) = undefined
                         child.point1 = path.getPointAt(child.offset) || new Point(0, 0);
                         child.point2 = new Point(shape.point2);
                         path.remove();
@@ -102,8 +99,7 @@ export class RenderApi {
 
                 });
             }
-            if (param === 'noParents') { }
-            else {
+            if (param === 'noParents') { } else {
                 if (shape.parents) {
                     shape.parents.forEach((parent: IShape) => {
                         if (parent.type && shape === parent.children[0]) {

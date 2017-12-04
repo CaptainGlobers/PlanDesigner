@@ -31,7 +31,7 @@ export class Stages {
                 this._topMenu.hideBackMenu();
             }
             this._render.back = this._levels[this._currentLevel].back;
-            this._render.backShapes = (this._levels[this._currentLevel - 1] && this._levels[this._currentLevel - 1].objects) ? this._levels[this._currentLevel - 1].objects : null;
+            this._render.backShapes = (this._levels[this._currentLevel - 1] && this._levels[this._currentLevel - 1].objects) ? this._levels[this._currentLevel - 1].objects : undefined;
             this._render.shapes = this._levels[this._currentLevel].objects;
             this._render.setLevel();
             this._leftMenu[2].children[2].content = (this._currentLevel !== 0) ? this._currentLevel : -1;
@@ -45,7 +45,6 @@ export class Stages {
         this.initMenu();
         this.selectLevel(1);
     }
-
 
     private loadProject(): void {
         this._render.cancelCreateWallHandler();
@@ -63,7 +62,7 @@ export class Stages {
         const firstLevel = {
             level: -1,
             objects: new Array()
-        }
+        };
         this._levels.push(firstLevel);
         this._currentLevel = 0;
         this.addLevel(1);
@@ -106,7 +105,7 @@ export class Stages {
         const newLevel: ILevel = {
             level: null,
             objects: new Array()
-        }
+        };
         this._levels.splice(id, 0, newLevel);
         this.selectLevel(id);
     }
@@ -117,7 +116,7 @@ export class Stages {
             this._levels[0].level = null;
             this.selectLevel(0);
         } else {
-            this.addLevel(0)
+            this.addLevel(0);
         }
     }
 

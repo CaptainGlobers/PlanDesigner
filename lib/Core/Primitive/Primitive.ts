@@ -1,4 +1,4 @@
-/// <reference path="../../../external/paper.d.ts"/>
+/// <reference path='../../../external/paper.d.ts'/>
 
 export interface IItem extends paper.Item { }
 

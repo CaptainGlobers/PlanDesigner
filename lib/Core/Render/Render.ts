@@ -16,7 +16,7 @@ export class Render {
     private _shapes: Array<IShape>;
     private _renderApi: RenderApi;
     private readonly _grid: IShape = new ShapeGrid();
-    private _selected: IShape = null;
+    private _selected: IShape = undefined;
     private _selectedMode: boolean = true;
     private _selectedPoint: IPoint = new Point(0, 0);
     private _events: Events;
@@ -34,9 +34,9 @@ export class Render {
 
     constructor(stageContainer: HTMLElement) {
         this._canvas = document.createElement('canvas');
-        this._canvas.oncontextmenu = () => { return false };
-        this._canvas.onmouseup = () => { this.selected = null }
-        document.oncontextmenu = () => { return false };
+        this._canvas.oncontextmenu = () => { return false; };
+        this._canvas.onmouseup = () => { this.selected = undefined; };
+        document.oncontextmenu = () => { return false; };
         this._canvas.width = window.innerWidth;
         this._canvas.height = window.innerHeight;
         stageContainer.appendChild(this._canvas);
@@ -108,7 +108,7 @@ export class Render {
         if (item > -1) {
             shape.renderObject.remove();
             this.deleteShapes(shape.children, shape);
-            shape.children = null;
+            shape.children = undefined;
             this._shapes.splice(item, 1);
         } else if ((shape.type === 5 || shape.type === 6 || shape.type === 7) && shape.parents) {
             item = shape.parents[0].children.indexOf(shape);
@@ -117,18 +117,18 @@ export class Render {
                 shape.parents[0].children.splice(item, 1);
             }
         } else {
-            console.log('ex: delete Shape not found shape');
+            console.warn('ex: delete Shape not found shape');
         }
     }
 
-    public deleteShapes(shapes: Array<IShape>, parent?: IShape) {
+    public deleteShapes(shapes: Array<IShape>, parent?: IShape): void {
         if (shapes) {
             shapes.forEach((shape: IShape) => {
                 if (shape.parents && shape.parents.length < 2) { // not del control
                     shape.renderObject.remove();
                     this.deleteShapes(shape.children);
                 } else if (parent) {
-                    let item: number = shape.parents.indexOf(parent);
+                    const item: number = shape.parents.indexOf(parent);
                     shape.parents.splice(item, 1);
                 }
             });
@@ -165,7 +165,7 @@ export class Render {
         ShapeDesignerHelper.shapeClear(this.backShapes);
         if (this.back && this.back.renderObject) {
             this.back.renderObject.remove();
-            this.back.renderObject = null;
+            this.back.renderObject = undefined;
         }
     }
 
@@ -222,7 +222,7 @@ export class Render {
                 shape.children.forEach((item: IShape) => createShapes(item));
             }
             this.setShapeHandlers(shape);
-        }
+        };
         this.reDraw();
         this._shapes.forEach((item: IShape) => createShapes(item));
     }
@@ -246,10 +246,10 @@ export class Render {
                     this._renderApi.renderShapeBack(shape, this._offsetX, this._offsetY);
                     shape.renderObject.fillColor = ColorConfig.transparent;
                     shape.renderObject.insertBelow(this._grid.renderObject);
-                    shape.renderObject.onMouseEnter = null;
-                    shape.renderObject.onMouseLeave = null;
+                    shape.renderObject.onMouseEnter = undefined;
+                    shape.renderObject.onMouseLeave = undefined;
                 }
-            })
+            });
         }
     }
 
@@ -268,11 +268,6 @@ export class Render {
             shape.offset = shape.parents[0].point1.getDistance(shape.point1);
         }
         this.renderShape(shape);
-
-        // recursive call moved to Render Api
-        // if (shape.children) {
-        //     shape.children.forEach((child: IShape, i: number) => this.moveShape(child, moveX, moveY));
-        // }
     }
 
     public moveBack(): void {
@@ -288,12 +283,12 @@ export class Render {
         };
 
         const handler: any = () => {
-            this.selected = null;
+            this.selected = undefined;
             rect.remove();
             this.back.renderObject.insertBelow(this._grid.renderObject);
-            this.back.renderObject.onMouseUp = null;
-            this.back.renderObject.onMouseDown = null;
-            this.back.renderObject.onMouseLeave = null;
+            this.back.renderObject.onMouseUp = undefined;
+            this.back.renderObject.onMouseDown = undefined;
+            this.back.renderObject.onMouseLeave = undefined;
         };
 
         this.back.renderObject.onMouseUp = handler;
@@ -306,7 +301,6 @@ export class Render {
             const moveX: number = currentPoint.x - this._startMove.x;
             const moveY: number = currentPoint.y - this._startMove.y;
             this.moveShape(this.selected, moveX, moveY);
-            // this._selectedPoint = curentPoint;
         }
     }
 
@@ -315,7 +309,7 @@ export class Render {
     private _startPoint2: IPoint = new Point(0, 0);
 
     public setShapeHandlers(newShape: IShape): IShape {
-        const selectShape: Function = (event, calback) => {
+        const selectShape: Function = (event, callback) => {
             if (event.event.button === 0) {
                 this._selectedPoint.x = event.point.x - this._offsetX * this.zoom;
                 this._selectedPoint.y = event.point.y - this._offsetY * this.zoom;
@@ -326,8 +320,8 @@ export class Render {
                 this._startPoint1 = new Point(this.selected.point1);
                 this._startPoint2 = new Point(this.selected.point2);
             } else if (event.event.button === 2) {
-                if (calback) {
-                    calback(event, newShape);
+                if (callback) {
+                    callback(event, newShape);
                 }
             }
         };
@@ -337,11 +331,11 @@ export class Render {
             };
         } else if (newShape.type === 5 || newShape.type === 6 || newShape.type === 7) {
             newShape.renderObject.onMouseDown = (event: any) => {
-                selectShape(event, this._dialog.onwallShapeContext(event, newShape));
+                selectShape(event, this._dialog.onWallShapeContext(event, newShape));
             };
         } else {
             newShape.renderObject.onMouseDown = (event: any) => {
-                selectShape(event, null);
+                selectShape(event, undefined);
             };
         }
 
@@ -353,7 +347,7 @@ export class Render {
                 this.selected.point1.y = Math.round(this.selected.point1.y);
                 this.selected.point2.y = Math.round(this.selected.point2.y);
             }
-            this.selected = null;
+            this.selected = undefined;
             saveAsFunct();
         };
         newShape.renderObject.onMouseUp = () => {
@@ -363,7 +357,7 @@ export class Render {
                 this.selected.point1.y = Math.round(this.selected.point1.y);
                 this.selected.point2.y = Math.round(this.selected.point2.y);
             }
-            this.selected = null;
+            this.selected = undefined;
         };
         return newShape;
     }
@@ -406,8 +400,7 @@ export class Render {
         original.x = Math.round(original.x / Render.round) * Render.round;
         original.y = Math.round(original.y / Render.round) * Render.round;
 
-        const newPpoint: IPoint = this._renderApi.newPosition(original.x + this._offsetX, original.y + this._offsetY);
-        return newPpoint;
+        return this._renderApi.newPosition(original.x + this._offsetX, original.y + this._offsetY);
     }
 
     private _drawWallMouseDownHandler;
@@ -420,32 +413,32 @@ export class Render {
         this._selectedMode = false;
 
         let line: IPath;
-        let startPoint: IPoint = null;
-        let startShape: IShape = null;
-        let chainControl: IShape = null;
+        let startPoint: IPoint = undefined;
+        let startShape: IShape = undefined;
+        let chainControl: IShape = undefined;
 
-        let cancelEvent;
-        let near: IShape = null;
+        let cancelEvent: () => void;
+        let near: IShape = undefined;
 
-        const onMouseDown = (event: any) => {
+        const onMouseDown: (event: any) => void = (event: any) => {
             if (this._drawWallMouseDownHandler && event.point.y < 35) {
                 cancelEvent();
             } else if (this._drawWallMouseDownHandler) {
                 this._drawWallMouseDownHandler(event);
             }
         };
-        const onMouseMove = (event: any) => {
+        const onMouseMove: (event: any) => void = (event: any) => {
             this._drawWallMouseMoveHandler(event);
         };
         cancelEvent = () => {
-            this._drawWallMouseDownHandler = null;
-            this._drawWallMouseMoveHandler = null;
-            startPoint = null;
-            startShape = null;
+            this._drawWallMouseDownHandler = undefined;
+            this._drawWallMouseMoveHandler = undefined;
+            startPoint = undefined;
+            startShape = undefined;
             if (line) {
                 line.remove();
             }
-            line = null;
+            line = undefined;
             this._events.removeMouseDownListener(onMouseDown);
             this._events.removeMouseMoveListener(onMouseMove);
             this._selectedMode = true;
@@ -469,7 +462,7 @@ export class Render {
                         newShape.children[0] = startShape;
                         startShape.renderObject.insertAbove(this._menu[0]);
                         startShape.parents.push(newShape);
-                        startShape = null;
+                        startShape = undefined;
                     }
                 }
                 if (this.selected) {
@@ -488,18 +481,18 @@ export class Render {
                     chainControl.renderObject.insertAbove(this._menu[0]);
                 }
                 line.remove();
-                line = null;
+                line = undefined;
                 if (!isChain) {
-                    startPoint = null;
-                    chainControl = null;
+                    startPoint = undefined;
+                    chainControl = undefined;
                 } else {
                     chainControl = newShape.children[1];
                 }
             } else if (this.selected) {
                 startShape = this.selected;
-                this.selected = null;
+                this.selected = undefined;
             }
-        }
+        };
 
         let saveSelect: IShape;
         const startOffsetX: number = this._offsetX;
@@ -514,7 +507,7 @@ export class Render {
                 line.strokeWidth = 2;
                 // TODO: find paper type
                 (line as any).moveAbove(this._grid.renderObject);
-                startPoint = null;
+                startPoint = undefined;
             } else if (line) {
                 near = this.findAround(event.point, 20 * this.zoom);
                 if (near) {
@@ -524,24 +517,24 @@ export class Render {
                 } else {
                     line.segments[line.segments.length - 1].point = point2;
                     if (this.selected === saveSelect) {
-                        this.selected = null;
+                        this.selected = undefined;
                     }
                 }
             }
-        }
+        };
 
         this.cancelCreateWallHandler = () => {
             if (this._drawWallMouseMoveHandler || this._drawWallMouseDownHandler) {
-                cancelEvent(this);
+                cancelEvent();
             }
-        }
+        };
         this._events.clearMouseDownListener();
         this._events.addMouseDownListener(onMouseDown);
         this._events.addMouseMoveListener(onMouseMove);
     }
 
     private findAround(point: IPoint, round: number): IShape {
-        let result: IShape = null;
+        let result: IShape = undefined;
         const aroundShape: Function = (shapes: Array<IShape>) => {
             shapes.forEach((shape: IShape) => {
                 if (shape.type === 11 || shape.type === 12) {
@@ -554,7 +547,7 @@ export class Render {
                     aroundShape(shape.children);
                 }
             });
-        }
+        };
         aroundShape(this._shapes);
         return result;
     }
@@ -562,9 +555,9 @@ export class Render {
     public createColumn(): any {
         this.cancelCreateWallHandler();
         this._selectedMode = false;
-        let cancelEvent;
+        let cancelEvent: () => void;
 
-        const onMouseDown = (event: any) => {
+        const onMouseDown: (event: any) => void = (event: any) => {
             if (event.point.y > 35) {
                 const point1: IPoint = this._renderApi.originalPosition(event.point.x - this._offsetX * this.zoom, event.point.y - this._offsetY * this.zoom);
                 point1.x = Math.round(point1.x / Render.round) * Render.round;
@@ -582,7 +575,7 @@ export class Render {
         cancelEvent = () => {
             this._events.removeMouseDownListener(onMouseDown);
             this._selectedMode = true;
-        }
+        };
 
         this._events.clearMouseDownListener();
         this._events.addMouseDownListener(onMouseDown);
@@ -591,9 +584,9 @@ export class Render {
     public createShapeOnWall(type: number): any {
         this.cancelCreateWallHandler();
         this._selectedMode = false;
-        let cancelEvent;
+        let cancelEvent: () => void;
 
-        const onMouseDown = (event: any) => {
+        const onMouseDown: (event: any) => void = (event: any) => {
             if (event.event.button === 0) {
                 if (event.point.y > 35 && this.selected && (this.selected.type === 1 || this.selected.type === 2 || this.selected.type === 4)) {
                     const selected: IShape = this.selected;
@@ -619,7 +612,7 @@ export class Render {
         cancelEvent = () => {
             this._events.removeMouseDownListener(onMouseDown);
             this._selectedMode = true;
-        }
+        };
 
         this._events.clearMouseDownListener();
         this._events.addMouseDownListener(onMouseDown);

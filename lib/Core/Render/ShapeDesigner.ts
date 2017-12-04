@@ -21,16 +21,16 @@ export class ShapeDesigner {
         return MathCalc.getPosition(x, y, this.zoom, this.center);
     }
 
-    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, windowOffsetX: number, windowOffsetY: number) {
+    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, windowOffsetX: number, windowOffsetY: number): void {
         const offsetX: number = windowOffsetX - Math.round(windowWidth / 2) - 3;
         const offsetY: number = windowOffsetY - Math.round(windowHeight / 2) - 5;
         const high: number = (this.zoom > 1.5) ? 50 : 100;
         const width: number = (this.zoom > 1.5) ? 50 : 100;
         const pool: Array<IPath> = [];
-        const widthElement = Math.round(2 * windowWidth / width);
-        const highElement = Math.round(2 * windowHeight / high);
-        const widthLength = widthElement * width;
-        const highLength = highElement * high;
+        const widthElement: number = Math.round(2 * windowWidth / width);
+        const highElement: number = Math.round(2 * windowHeight / high);
+        const widthLength: number = widthElement * width;
+        const highLength: number = highElement * high;
 
         for (let i: number = 0; i <= widthElement; i++) {
             pool.push(ShapeDesignerHelper.drawGridLine(

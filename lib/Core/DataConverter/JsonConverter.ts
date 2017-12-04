@@ -20,7 +20,7 @@ export class JsonConverter {
                     let shape: IShape = new Shape(point1, point2, object.type);
                     if (object.type === 5 || object.type === 6 || object.type === 7) {
                         const width: number = point1.getDistance(point2);
-                        //debugger;
+                        // debugger;
                         shape = new Shape(point1, parent.point2, object.type);
                         parent.children.push(shape);
                         shape.parents = [parent];
@@ -39,10 +39,10 @@ export class JsonConverter {
                 });
             }
             return result;
-        }
+        };
 
         const isUnderLevelSet: boolean = (dataI.levels[0][-1]) ? true : false;
-        //const iterator = isUnderLevelSet ? -1 : 0;
+        // const iterator = isUnderLevelSet ? -1 : 0;
 
         const result: Array<ILevel> = [];
         if (!isUnderLevelSet) {
@@ -61,7 +61,7 @@ export class JsonConverter {
             }
             result.push({
                 level: null,
-                objects: getObjects(levelI[i].objects, null)
+                objects: getObjects(levelI[i].objects, undefined)
             });
         });
 

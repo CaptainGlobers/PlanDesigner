@@ -59,7 +59,7 @@ export class TopMenu {
             } else {
                 alert('Удалите текущую подложку');
             }
-        }
+        };
         this._menu[5].children[3].children[1].children[1].content = 'Удалить';
         this._menu[5].children[3].children[1].onClick = () => {
             this._render.cancelCreateWallHandler();
@@ -68,7 +68,7 @@ export class TopMenu {
             } else {
                 alert('На данном уровне подложки нет');
             }
-        }
+        };
         this._menu[5].children[3].children[2].children[1].content = 'Скрыть';
         this._menu[5].children[3].children[2].onClick = () => {
             this._render.cancelCreateWallHandler();
@@ -76,7 +76,7 @@ export class TopMenu {
                 this._render.hideBack();
                 this.hideBackMenu();
             }
-        }
+        };
         this._menu[5].children[3].children[3].children[1].content = 'Отобразить';
         this._menu[5].children[3].children[3].onClick = () => {
             this._render.cancelCreateWallHandler();
@@ -84,7 +84,7 @@ export class TopMenu {
                 this.showBackMenu();
                 this._render.showBack();
             }
-        }
+        };
         this._menu[5].children[3].children[4].visible = false;
 
         this._menu[6].visible = false;
@@ -131,32 +131,32 @@ export class TopMenu {
     }
 
     private _newProject: () => void;
-    public setFnNewProject(fn: () => void) {
+    public setFnNewProject(fn: () => void): void {
         this._newProject = fn;
     }
 
     private _saveProject: () => void;
-    public setFnSaveProject(fn: () => void) {
+    public setFnSaveProject(fn: () => void): void {
         this._saveProject = fn;
     }
 
     private _loadProject: () => void;
-    public setFnLoadProject(fn: () => void) {
+    public setFnLoadProject(fn: () => void): void {
         this._loadProject = fn;
     }
 
     private _loadBackground: () => boolean;
-    public setFnLoadBackground(fn: () => boolean) {
+    public setFnLoadBackground(fn: () => boolean): void {
         this._loadBackground = fn;
     }
 
     private _backgroundRemove: () => boolean;
-    public setFnBackgroundRemove(fn: () => boolean) {
+    public setFnBackgroundRemove(fn: () => boolean): void {
         this._backgroundRemove = fn;
     }
 
     private _hasBackground: () => boolean;
-    public setFnHasground(fn: () => boolean) {
+    public setFnHasground(fn: () => boolean): void {
         this._hasBackground = fn;
     }
 }
@@ -176,35 +176,35 @@ export class TopMenu {
                     const foo: any = (window as any).saveAs;
                     foo(new Blob([data]), filename);
                 }
-                input.style.cursor = "pointer";
+                input.style.cursor = 'pointer';
                 input.style.width = 120 + 'px';
                 input.style.position = 'fixed';
                 input.style.top = 60 + 'px';
                 //input.style.opacity = '0';
-        
+
                 this._topMenu.menu1.onMouseEnter = (event) => {
                     const children: any = event.target.parent.children;
                     console.log('c ' + children.count, children);
                     if (children.count === 5) {
                         children[1].fillColor = ColorConfig.menuMouseEnter;
                         children[3].visible = true;
-                        document.body.style.cursor = "pointer";
+                        document.body.style.cursor = 'pointer';
                         children[0].fillColor = ColorConfig.transparent;
-        
+
                         data = link.parseData(link);
                         document.body.appendChild(form);
                     }
                 }
-        
+
                 this._topMenu.menu1.onMouseLeave = (event) => {
                     const children: any = event.target.parent.children;
                     console.log('c ' + children.count, children);
                     if (children.count === 5) {
                         children[1].fillColor = ColorConfig.button;
                         children[3].visible = false;
-                        document.body.style.cursor = "default";
-                        children[0].fillColor = null;
-        
+                        document.body.style.cursor = 'default';
+                        children[0].fillColor = ColorConfig.transparent;
+
                         document.body.removeChild(form);
                     }
                 }*/

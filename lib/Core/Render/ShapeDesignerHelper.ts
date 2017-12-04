@@ -5,12 +5,12 @@ import { ColorConfig } from './ColorConfig';
 
 export class ShapeDesignerHelper {
 
-    public static shapeClear(shapes: Array<IShape>) {
+    public static shapeClear(shapes: Array<IShape>): void {
         if (shapes) {
             shapes.forEach((shape: IShape) => {
                 if (shape.renderObject) { // type 11, 12 can be removed
                     shape.renderObject.remove();
-                    shape.renderObject = null;
+                    shape.renderObject = undefined;
                     this.shapeClear(shape.children);
                 }
             });
@@ -25,7 +25,7 @@ export class ShapeDesignerHelper {
     }
 
     public static createRectangle(
-        point: IPoint, width: number, length: number, fillColor, angle: number, notSetY?: boolean
+        point: IPoint, width: number, length: number, fillColor: IColor | string, angle: number, notSetY?: boolean
     ): IPath {
         const size: ISize = new Size(width, length);
         const rect: IPath = Path.Rectangle(point, size);
@@ -58,8 +58,8 @@ export class ShapeDesignerHelper {
         return renderObject;
     }
 
-    public static drawGridLine(point1, point2): IPath {
-        var myPath = new Path();
+    public static drawGridLine(point1: IPoint, point2: IPoint): IPath {
+        const myPath: IPath = new Path();
         myPath.strokeColor = ColorConfig.gridLine;
         myPath.strokeWidth = 1;
         myPath.add(point1);

@@ -17,7 +17,7 @@ export class Dialog {
     public create(): HTMLElement {
         if (this._dialogHelper) {
             this._dialogHelper.parentElement.removeChild(this._dialogHelper);
-            this._dialogHelper = null;
+            this._dialogHelper = undefined;
         }
 
         const div: HTMLElement = document.createElement('div');
@@ -29,10 +29,10 @@ export class Dialog {
         return div;
     }
 
-    public contextMenu(event: any, menu: Array<any>) {
+    public contextMenu(event: any, menu: Array<any>): void {
         if (this._dialogHelper) {
             this._dialogHelper.parentElement.removeChild(this._dialogHelper);
-            this._dialogHelper = null;
+            this._dialogHelper = undefined;
         }
 
         const menuContainer: HTMLElement = document.createElement('div');
@@ -47,16 +47,16 @@ export class Dialog {
             text.textContent = item.text;
             text.onclick = () => {
                 menuContainer.parentElement.removeChild(menuContainer);
-                this._dialogHelper = null;
+                this._dialogHelper = undefined;
                 item.callback();
                 this._render.reDraw();
-            }
+            };
             text.onmouseenter = () => {
                 text.style.backgroundColor = ColorConfig.dialog;
-            }
+            };
             text.onmouseleave = () => {
                 text.style.backgroundColor = '';
-            }
+            };
             text.style.cursor = 'pointer';
             text.style.margin = '5px';
             menuContainer.appendChild(text);
@@ -66,18 +66,18 @@ export class Dialog {
         this._dialogHelper = menuContainer;
     }
 
-    public wallContext(event: any, shape: IShape) {
+    public wallContext(event: any, shape: IShape): void {
         if (event.event.button === 2) {
             const subMenu: Array<any> = [
                 {
                     text: 'Внешняя несущая',
-                    callback: () => { shape.type = 1 }
+                    callback: () => { shape.type = 1; }
                 }, {
                     text: 'Внутреняя несущая',
-                    callback: () => { shape.type = 2 }
+                    callback: () => { shape.type = 2; }
                 }, {
                     text: 'Перегородка',
-                    callback: () => { shape.type = 4 }
+                    callback: () => { shape.type = 4; }
                 }, {
                     text: 'Закрыть',
                     callback: () => { }
@@ -103,7 +103,7 @@ export class Dialog {
         }
     }
 
-    public onwallShapeContext(event: any, shape: IShape) {
+    public onWallShapeContext(event: any, shape: IShape): void {
         if (event.event.button === 2) {
             const callback: Function = () => { };
             const menu: Array<any> = [
@@ -121,7 +121,7 @@ export class Dialog {
         }
     }
 
-    public createDialog(event: any, shape: IShape, callback: Function) {
+    public createDialog(event: any, shape: IShape, callback: Function): void {
         const div: HTMLElement = this.create();
 
         const textContainer: HTMLElement = document.createElement('div');
@@ -134,7 +134,7 @@ export class Dialog {
 
         const text: HTMLElement = document.createElement('div');
         text.textContent = 'mm';
-        text.style.marginLeft = '2px'
+        text.style.marginLeft = '2px';
         text.style.display = 'inline-block';
         const line: HTMLElement = document.createElement('div');
         div.appendChild(textContainer);
@@ -153,7 +153,7 @@ export class Dialog {
 
         button.onclick = () => {
             div.parentElement.removeChild(div);
-            this._dialogHelper = null;
+            this._dialogHelper = undefined;
             callback(shape, input);
             this._render.reDraw();
         };
@@ -163,7 +163,7 @@ export class Dialog {
         this._dialogHelper = div;
     }
 
-    public createDialog2(callback: Function, shape: IShape) {
+    public createDialog2(callback: Function, shape: IShape): void {
         const div: HTMLElement = this.create();
 
         const textContainer1: HTMLElement = document.createElement('div');
@@ -172,10 +172,10 @@ export class Dialog {
         const input1: HTMLInputElement = document.createElement('input');
         input1.style.width = '100px';
         input1.value = '' + shape.width;
-        input1.style.marginLeft = '54px'
+        input1.style.marginLeft = '54px';
         const text1: HTMLElement = document.createElement('div');
         text1.textContent = 'mm';
-        text1.style.marginLeft = '2px'
+        text1.style.marginLeft = '2px';
         text1.style.display = 'inline-block';
         const line1: HTMLElement = document.createElement('div');
         div.appendChild(textContainer1);
@@ -188,11 +188,11 @@ export class Dialog {
         textContainer2.style.display = 'inline-block';
         const input2: HTMLInputElement = document.createElement('input');
         input2.style.width = '100px';
-        input2.style.marginLeft = '60px'
+        input2.style.marginLeft = '60px';
         input2.value = '' + shape.height;
         const text2: HTMLElement = document.createElement('div');
         text2.textContent = 'mm';
-        text2.style.marginLeft = '2px'
+        text2.style.marginLeft = '2px';
         text2.style.display = 'inline-block';
         const line2: HTMLElement = document.createElement('div');
         div.appendChild(textContainer2);
@@ -208,7 +208,7 @@ export class Dialog {
         input3.value = '' + shape.plane;
         const text3: HTMLElement = document.createElement('div');
         text3.textContent = 'mm';
-        text3.style.marginLeft = '2px'
+        text3.style.marginLeft = '2px';
         text3.style.display = 'inline-block';
         const line3: HTMLElement = document.createElement('div');
         div.appendChild(textContainer3);
@@ -227,10 +227,10 @@ export class Dialog {
 
         button.onclick = () => {
             div.parentElement.removeChild(div);
-            this._dialogHelper = null;
-            shape.width = parseInt(input1.value);
-            shape.height = parseInt(input2.value);
-            shape.plane = parseInt(input3.value);
+            this._dialogHelper = undefined;
+            shape.width = parseInt(input1.value, 10);
+            shape.height = parseInt(input2.value, 10);
+            shape.plane = parseInt(input3.value, 10);
             callback();
             this._render.reDraw();
         };

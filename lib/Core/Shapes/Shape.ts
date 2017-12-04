@@ -10,11 +10,11 @@ export class Shape implements IShape {
     public renderObject: IGroup;
     public parents: Array<IShape>;
     public offset: number;
-    public width: number = null;
-    public height: number = null;
-    public plane: number = null;
+    public width: number = undefined;
+    public height: number = undefined;
+    public plane: number = undefined;
 
-    constructor(point1: IPoint, point2: IPoint, type) {
+    constructor(point1: IPoint, point2: IPoint, type: number) {
         this.point1 = new Point(point1);
         this.point2 = new Point(point2);
         this.type = type;

@@ -1,5 +1,5 @@
 import { ColorConfig } from './ColorConfig';
-import { IGroup, IPath, Point, Group, IPoint, IRaster, Raster, PointText, Path, Size } from '../Primitive/Primitive';
+import { IGroup, IPath, Point, Group, IPoint, IRaster, Raster, PointText, Path, Size, IPointText } from '../Primitive/Primitive';
 import { GraphicsSettings } from './GraphicsSettings';
 
 export class MenuDesigner {
@@ -42,24 +42,24 @@ export class MenuDesigner {
             const text: PointText =
                 PointText.create(new Point(point1.x + 35, point1.y + 22), 'left', ColorConfig.menuText, ``);
             const subMenu: IGroup =
-                (i == 2) ? MenuDesigner.drawSubMenu(5, point1.x, 250) : MenuDesigner.drawSubMenu(5, point1.x);
+                (i === 2) ? MenuDesigner.drawSubMenu(5, point1.x, 250) : MenuDesigner.drawSubMenu(5, point1.x);
             subMenu.visible = false;
 
-            const group = new Group([outSelect, button, text, subMenu, icon]);
+            const group: IGroup = new Group([outSelect, button, text, subMenu, icon]);
 
-            group.onMouseEnter = function (event) {
+            group.onMouseEnter = function (event: MouseEvent): void {
                 this.children[1].fillColor = ColorConfig.menuMouseEnter;
                 this.children[3].visible = true;
-                document.body.style.cursor = "pointer";
+                document.body.style.cursor = 'pointer';
                 this.children[0].fillColor = ColorConfig.transparent;
-            }
+            };
 
-            group.onMouseLeave = function (event) {
+            group.onMouseLeave = function (event: MouseEvent): void {
                 this.children[1].fillColor = ColorConfig.button;
                 this.children[3].visible = false;
-                document.body.style.cursor = "default";
-                this.children[0].fillColor = null;
-            }
+                document.body.style.cursor = 'default';
+                this.children[0].fillColor = ColorConfig.transparent;
+            };
             menuItem.push(group);
             point1.x = point1.x + margin + widthItem;
         }
@@ -82,15 +82,15 @@ export class MenuDesigner {
             const icon: IRaster =
                 Raster.create('icon/leftMenu' + i + '.png', new Point(point1.x + 20, point1.y + 20), 0.25);
 
-            const group = MenuDesigner.drawMenuItem(point1, widthItem, heightItem, icon);
-            group.onMouseEnter = function (event) {
+            const group: IGroup = MenuDesigner.drawMenuItem(point1, widthItem, heightItem, icon);
+            group.onMouseEnter = function (event: MouseEvent): void {
                 this.children[0].fillColor = ColorConfig.menuMouseEnter;
-                document.body.style.cursor = "pointer";
-            }
-            group.onMouseLeave = function (event) {
+                document.body.style.cursor = 'pointer';
+            };
+            group.onMouseLeave = function (event: MouseEvent): void {
                 this.children[0].fillColor = ColorConfig.button;
-                document.body.style.cursor = "default";
-            }
+                document.body.style.cursor = 'default';
+            };
 
             group.insertAbove(menuGroup);
             menu.push(group);
@@ -116,18 +116,18 @@ export class MenuDesigner {
 
     public static drawSubMenu(count: number, positionStartX: number, widthItem: number = 120): IGroup {
         const point1: IPoint = new Point(positionStartX, 40);
-        const heightItem: number = 20
+        const heightItem: number = 20;
 
         const subMenuItems: Array<IGroup> = [];
         for (let i: number = 0; i < count; i++) {
             const subMenuItem: IGroup = MenuDesigner.drawMenuItem(point1, widthItem, heightItem);
-            subMenuItem.onMouseEnter = function (event) {
+            subMenuItem.onMouseEnter = function (event: MouseEvent): void {
                 this.children[0].fillColor = ColorConfig.menuMouseEnter;
-            }
+            };
 
-            subMenuItem.onMouseLeave = function (event) {
+            subMenuItem.onMouseLeave = function (event: MouseEvent): void {
                 this.children[0].fillColor = ColorConfig.button;
-            }
+            };
 
             subMenuItems.push(subMenuItem);
             point1.y = point1.y + heightItem;
@@ -151,26 +151,26 @@ export class MenuDesigner {
         const icon2: IRaster =
             Raster.create('icon/start1.png', new Point(center.x + width / 4, center.y + 10), 0.6, 0.5);
 
-        const iconMouseEnterHandler: Function = (elem) => {
+        const iconMouseEnterHandler: Function = (elem: IRaster) => {
             elem.opacity = 1;
-            document.body.style.cursor = "pointer";
-        }
+            document.body.style.cursor = 'pointer';
+        };
 
-        const iconMouseLeaveHandler: Function = (elem) => {
+        const iconMouseLeaveHandler: Function = (elem: IRaster) => {
             elem.opacity = 0.5;
-            document.body.style.cursor = "default";
-        }
+            document.body.style.cursor = 'default';
+        };
 
         icon2.onMouseEnter = () => iconMouseEnterHandler(icon2);
         icon2.onMouseLeave = () => iconMouseLeaveHandler(icon2);
         icon1.onMouseEnter = () => iconMouseEnterHandler(icon1);
         icon1.onMouseLeave = () => iconMouseLeaveHandler(icon1);
 
-        const text1 = PointText.create(
+        const text1: IPointText = PointText.create(
             new Point(center.x - width / 4, center.y - height / 2 + 30), 'center', ColorConfig.menuText, '', 20
         );
 
-        const text2 = PointText.create(
+        const text2: IPointText = PointText.create(
             new Point(center.x + width / 4, center.y - height / 2 + 30), 'center', ColorConfig.menuText, '', 20
         );
 
