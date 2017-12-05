@@ -1,47 +1,49 @@
+import { Render } from './Render/Render';
+
 export class Events {
     private _mouseMoveListenerPool: Array<EventListener> = new Array();
     private _mouseDownListenerPool: Array<EventListener> = new Array();
-    private _renderBind;
+    private _render: Render;
 
-    constructor(renderBind: any) {
-        this._renderBind = renderBind;
+    constructor(render: Render) {
+        this._render = render;
         paper.project.activeLayer.onMouseMove = (event: any) => this.mouseMoveListenerCall(event);
         paper.project.activeLayer.onMouseDown = (event: any) => this.mouseDownListenerCall(event);
     }
 
-    private mouseMoveListenerCall(event: any) {
+    private mouseMoveListenerCall(event: any): void {
         if (this._mouseMoveListenerPool.length > 0) {
-            this._mouseMoveListenerPool.forEach((listener: any) => listener(event, this._renderBind));
+            this._mouseMoveListenerPool.forEach((listener: any) => listener(event, this._render));
         }
     }
 
-    public addMouseMoveListener(listener: any) {
+    public addMouseMoveListener(listener: any): void {
         this._mouseMoveListenerPool.push(listener);
     }
 
-    public removeMouseMoveListener(listener: any) {
+    public removeMouseMoveListener(listener: any): void {
         this._mouseMoveListenerPool.splice(this._mouseMoveListenerPool.indexOf(listener), 1);
     }
 
-    public clearMouseMoveListener() {
+    public clearMouseMoveListener(): void {
         this._mouseMoveListenerPool = new Array();
     }
 
-    public clearMouseDownListener() {
+    public clearMouseDownListener(): void {
         this._mouseDownListenerPool = new Array();
     }
 
-    private mouseDownListenerCall(event: any) {
+    private mouseDownListenerCall(event: any): void {
         if (this._mouseDownListenerPool.length > 0) {
-            this._mouseDownListenerPool.forEach((listener: any) => listener(event, this._renderBind));
+            this._mouseDownListenerPool.forEach((listener: any) => listener(event, this._render));
         }
     }
 
-    public addMouseDownListener(listener: any) {
+    public addMouseDownListener(listener: any): void {
         this._mouseDownListenerPool.push(listener);
     }
 
-    public removeMouseDownListener(listener: any) {
+    public removeMouseDownListener(listener: any): void {
         this._mouseDownListenerPool.splice(this._mouseDownListenerPool.indexOf(listener), 1);
     }
 }

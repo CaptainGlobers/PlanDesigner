@@ -309,7 +309,7 @@ export class Render {
     private _startPoint2: IPoint = new Point(0, 0);
 
     public setShapeHandlers(newShape: IShape): IShape {
-        const selectShape: Function = (event, callback) => {
+        const selectShape: Function = (event: any, callback: any) => {
             if (event.event.button === 0) {
                 this._selectedPoint.x = event.point.x - this._offsetX * this.zoom;
                 this._selectedPoint.y = event.point.y - this._offsetY * this.zoom;
@@ -403,8 +403,8 @@ export class Render {
         return this._renderApi.newPosition(original.x + this._offsetX, original.y + this._offsetY);
     }
 
-    private _drawWallMouseDownHandler;
-    private _drawWallMouseMoveHandler;
+    private _drawWallMouseDownHandler: (event: any) => void;
+    private _drawWallMouseMoveHandler: (event: any) => void;
     public cancelCreateWallHandler = () => { };
 
     public createWall(isChain: boolean, type: number): any {

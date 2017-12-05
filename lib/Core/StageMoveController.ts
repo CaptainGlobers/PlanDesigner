@@ -41,7 +41,7 @@ export class StageMoveController {
         this._moveCallback(this._offsetX, this._offsetY);
     }
 
-    private get zoom() {
+    private get zoom(): number {
         return this._graphicsSettings.zoom;
     }
 

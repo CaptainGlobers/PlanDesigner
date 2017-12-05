@@ -91,7 +91,7 @@ export class Dialog {
                     callback: () => this._render.splitWall(shape)
                 }, {
                     text: 'Изменить параметры',
-                    callback: () => this.createDialog(event, shape, (shape, input) => MathCalc.setShapeLength(shape, Math.round(parseFloat(input.value))))
+                    callback: () => this.createDialog(event, shape, (shapeItem: IShape, input: HTMLInputElement) => MathCalc.setShapeLength(shapeItem, Math.round(parseFloat(input.value))))
                 }, {
                     text: 'Удалить',
                     callback: () => this._render.deleteShape(shape)
@@ -121,7 +121,7 @@ export class Dialog {
         }
     }
 
-    public createDialog(event: any, shape: IShape, callback: Function): void {
+    public createDialog(event: any, shape: IShape, clickFn: Function): void {
         const div: HTMLElement = this.create();
 
         const textContainer: HTMLElement = document.createElement('div');
@@ -154,7 +154,7 @@ export class Dialog {
         button.onclick = () => {
             div.parentElement.removeChild(div);
             this._dialogHelper = undefined;
-            callback(shape, input);
+            clickFn(shape, input);
             this._render.reDraw();
         };
 

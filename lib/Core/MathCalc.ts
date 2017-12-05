@@ -3,7 +3,7 @@ import { IShape } from './Shapes/IShape';
 
 export class MathCalc {
 
-    public static getPosition(x: number, y: number, scale, center: IPoint): IPoint {
+    public static getPosition(x: number, y: number, scale: number, center: IPoint): IPoint {
         const cx: number = center.x;
         const cy: number = center.y;
         const x1: number = x - cx;
@@ -28,7 +28,7 @@ export class MathCalc {
         const point1: IPoint = shape.point1;
         const point2: IPoint = shape.point2;
 
-        const angWithOx = Math.atan2(point2.y - point1.y, point2.x - point1.x);
+        const angWithOx: number = Math.atan2(point2.y - point1.y, point2.x - point1.x);
         const onev: IPoint = new Point(0, 0);
         onev.x = Math.cos(angWithOx);
         onev.y = Math.sin(angWithOx);
@@ -37,14 +37,14 @@ export class MathCalc {
         shape.point2.y = point1.y + onev.y * length / 10;
     }
 
-    public static getNormal(A: IPoint, B: IPoint, C: IPoint): IPoint {
+    public static getNormal(point1: IPoint, point2: IPoint, point3: IPoint): IPoint {
         function VDot(v1: IPoint, v2: IPoint): number {
-            return v1.x * v2.x + v1.y * v2.y
+            return v1.x * v2.x + v1.y * v2.y;
         }
-        function VMul(v1: IPoint, A: number): IPoint {
+        function VMul(v1: IPoint, a: number): IPoint {
             const result: IPoint = new Point(0, 0);
-            result.x = v1.x * A;
-            result.y = v1.y * A;
+            result.x = v1.x * a;
+            result.y = v1.y * a;
             return result;
         }
         function VSub(v1: IPoint, v2: IPoint): IPoint {
@@ -53,10 +53,9 @@ export class MathCalc {
             result.y = v1.y - v2.y;
             return result;
         }
-        function VNorm(V): IPoint {
+        function VNorm(V: IPoint): IPoint {
             const result: IPoint = new Point(0, 0);
-            var vl;
-            vl = Math.sqrt(V.x * V.x + V.y * V.y);
+            const vl: number = Math.sqrt(V.x * V.x + V.y * V.y);
             result.x = V.x / vl;
             result.y = V.y / vl;
             return result;
@@ -65,16 +64,15 @@ export class MathCalc {
             let result: IPoint = new Point(0, 0);
             A = VNorm(A);
             result = VMul(A, VDot(A, B));
-            return result
+            return result;
         }
 
-        let result: IPoint = new Point(0, 0);
-        var CA = VSub(C, A);
-        result = VSub(VProject(VSub(B, A), CA), CA);
-        return result;
+        const CA: IPoint = VSub(point3, point1);
+        const resultPoint: IPoint = VSub(VProject(VSub(point2, point1), CA), CA);
+        return resultPoint;
     }
 
-    public static linePoint(point1: IPoint, point2: IPoint, r: number) {
+    public static linePoint(point1: IPoint, point2: IPoint, r: number): IPoint {
         const x1: number = point1.x;
         const x2: number = point2.x;
         const y1: number = point1.y;
