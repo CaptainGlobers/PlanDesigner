@@ -10,27 +10,12 @@ export class JsonConverter {
     public static getLevels(dto: string, render: Render): Array<ILevel> {
         const data: any = JSON.parse(dto);
         const zeroPoint: IPoint = new Point(data.offset[0], data.offset[1]);
-        const hasBasement: boolean = data.levels[0][-1] ? true : false;
-
         const result: Array<ILevel> = [];
-        if (!hasBasement) {
-            result.push({
-                level: -1,
-                objects: new Array()
-            });
-        }
-
-        data.levels.forEach((levelI: any, i: number) => {
-            if (hasBasement && i === 0) {
-                i = -1;
-            } else if (hasBasement) {
-            } else if (!hasBasement) {
-                i++;
-            }
-            result.push({
-                level: null,
-                objects: JsonConverter.getObjects(levelI[i].objects, undefined, render, zeroPoint)
-            });
+        data.levels.forEach((level: any) => {
+            result[level.floorNumber] = {
+                floorNumber: level.floorNumber,
+                objects: JsonConverter.getObjects(level.objects, undefined, render, zeroPoint)
+            };
         });
 
         return result;

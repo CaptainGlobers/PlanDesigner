@@ -34,7 +34,7 @@ export class DataConverter {
         };
 
         levels.forEach((level: ILevel, i: number) => {
-            if (!level.level) {
+            if (!level.floorNumber) {
                 getZeroShape(level.objects);
             }
         });
@@ -87,21 +87,13 @@ export class DataConverter {
     }
 
     private static getLevels(levels: Array<ILevel>, zeroPoint: IPoint): Array<any> {
-        const hasBasement: boolean = levels[0].level === null;
-        let iterator: number = hasBasement ? -1 : 1;
-
         const result: Array<any> = new Array();
         levels.forEach((level: ILevel, i: number) => {
-            if (!level.level) {
+            if (level.floorNumber && level.objects && level.objects.length) {
                 result.push({
-                    [iterator]: {
-                        objects: DataConverter.getShapes(level.objects, zeroPoint)
-                    },
+                    floorNumber: level.floorNumber,
+                    objects: DataConverter.getShapes(level.objects, zeroPoint)
                 });
-                if (iterator === -1) {
-                    iterator++;
-                }
-                iterator++;
             }
         });
 

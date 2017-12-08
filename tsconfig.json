@@ -11,15 +11,15 @@
     "declaration": true,
 	"stripInternal": true,
 	"watch": true,
-    "outFile": "dist/project.js"
+    "outFile": "demo/demo.js"
   },
   "include": [
-    "lib/**/*.ts"
+    "lib/**/*.ts",
+    "demo/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "grunt",
-    "**/*.spec.ts",
-    "demo"
+    "**/*.spec.ts"
   ]
 }

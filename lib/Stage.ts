@@ -4,6 +4,7 @@ import { JsonConverter } from './Core/DataConverter/JsonConverter';
 import { ShapeBack } from './Core/Shapes/ShapeBack';
 import { TopMenu } from './UI/TopMenu';
 import { StageHelper } from './StageHelper';
+import { DataConverter } from './Core/DataConverter/DataConverter';
 
 export class Stages {
     private _levels: Array<ILevel>;
@@ -15,11 +16,12 @@ export class Stages {
     constructor(stageContainer: HTMLElement) {
         this._render = new Render(stageContainer);
         this.initStartMenu();
+        this.saveHack();
     }
 
     private selectLevel(value: number): void {
         this._render.cancelCreateWallHandler();
-        if (this._levels[value] && this._levels[value].level === null) {
+        if (this._levels[value]) {
             this._currentLevel = value;
             this._render.clear();
             if (!this._levels[this._currentLevel].back) {
@@ -40,32 +42,52 @@ export class Stages {
         }
     }
 
-    private initProject(fileContent: string): void {
-        this._levels = JsonConverter.getLevels(fileContent, this._render);
-        this.initMenu();
-        this.selectLevel(1);
-    }
-
     private loadProject(): void {
         this._render.cancelCreateWallHandler();
-        StageHelper.loadProject((e: any) => this.initProject(e.target.result));
+        StageHelper.loadProject((e: any) => {
+            const fileContent: string = e.target.result;
+            this._levels = JsonConverter.getLevels(fileContent, this._render);
+            this.initMenu();
+            this.selectLevel(1);
+        });
     }
+    /*  TODO: replace saveHack
+        private saveProject(): void {
+            this._render.cancelCreateWallHandler();
+            StageHelper.saveProject(this._levels);
+        }
+        */
 
-    private saveProject(): void {
-        this._render.cancelCreateWallHandler();
-        StageHelper.saveProject(this._levels);
+    private saveHack(): void {
+        // FF and Opera bug-fix saveProject not work
+
+        const filename: string = 'pro.json';
+        // let data: string;
+        const form: HTMLFormElement = document.createElement('form');
+        const input: HTMLInputElement = document.createElement('input');
+        input.type = 'submit';
+        form.appendChild(input);
+        form.onsubmit = (e: Event) => {
+            this._render.cancelCreateWallHandler();
+            const data: string = DataConverter.getJson(this._levels);
+            e.preventDefault();
+            const foo: any = (window as any).saveAs;
+            foo(new Blob([data]), filename);
+        };
+        input.style.cursor = 'pointer';
+        input.style.width = 120 + 'px';
+        input.style.position = 'fixed';
+        input.style.top = 60 + 'px';
+
+        document.body.appendChild(form);
+        // input.style.opacity = '0';
     }
 
     private newProject(): void {
         this._render.cancelCreateWallHandler();
         this._levels = new Array();
-        const firstLevel = {
-            level: -1,
-            objects: new Array()
-        };
-        this._levels.push(firstLevel);
         this._currentLevel = 0;
-        this.addLevel(1);
+        this.addLevel();
     }
 
     private createProject(): void {
@@ -99,25 +121,15 @@ export class Stages {
     }
     */
 
-    private addLevel(id: number): void {
+    private addLevel(increase: boolean = true): void {
         this._render.cancelCreateWallHandler();
-        id += this._currentLevel;
-        const newLevel: ILevel = {
-            level: null,
+        const newFloorNumber: number = this._currentLevel + (increase ? 1 : -1);
+        this._levels[newFloorNumber] = {
+            floorNumber: newFloorNumber,
             objects: new Array()
         };
-        this._levels.splice(id, 0, newLevel);
-        this.selectLevel(id);
-    }
 
-    private addPrevLevel(): void {
-        this._render.cancelCreateWallHandler();
-        if (this._currentLevel === 1 && this._levels[0].level !== null) {
-            this._levels[0].level = null;
-            this.selectLevel(0);
-        } else {
-            this.addLevel(0);
-        }
+        this.selectLevel(newFloorNumber);
     }
 
     private _topMenu: TopMenu;
@@ -129,15 +141,15 @@ export class Stages {
         this._topMenu = new TopMenu(this._render);
         this._leftMenu = this._render.createLeftMenu(5);
 
-        this._leftMenu[0].onClick = () => this.addLevel(1);
+        this._leftMenu[0].onClick = () => this.addLevel();
         this._leftMenu[1].onClick = () => this.selectLevel(this._currentLevel + 1);
         this._leftMenu[2].children[2].content = '1';
         this._leftMenu[2].onClick = () => this._render.setZeroOffset();
         this._leftMenu[3].onClick = () => this.selectLevel(this._currentLevel - 1);
-        this._leftMenu[4].onClick = () => this.addPrevLevel();
+        this._leftMenu[4].onClick = () => this.addLevel(false);
 
         this._topMenu.setFnNewProject((): void => this.newProject());
-        this._topMenu.setFnSaveProject((): void => this.saveProject());
+        // this._topMenu.setFnSaveProject((): void => this.saveProject());
         this._topMenu.setFnLoadProject((): void => this.loadProject());
 
         this._topMenu.setFnLoadBackground((): boolean =>

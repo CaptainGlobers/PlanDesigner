@@ -159,52 +159,5 @@ export class TopMenu {
     public setFnHasground(fn: () => boolean): void {
         this._hasBackground = fn;
     }
+
 }
-
-        /*
-                // FF and Opera bug-fix saveProject not work
-                let link: Stages = {} as any;
-                link = this;
-                const filename: string = 'pro.json';
-                let data: string;
-                const form: HTMLFormElement = document.createElement('form');
-                const input: HTMLInputElement = document.createElement('input');
-                input.type = 'submit';
-                form.appendChild(input);
-                form.onsubmit = (e: Event) => {
-                    e.preventDefault();
-                    const foo: any = (window as any).saveAs;
-                    foo(new Blob([data]), filename);
-                }
-                input.style.cursor = 'pointer';
-                input.style.width = 120 + 'px';
-                input.style.position = 'fixed';
-                input.style.top = 60 + 'px';
-                //input.style.opacity = '0';
-
-                this._topMenu.menu1.onMouseEnter = (event) => {
-                    const children: any = event.target.parent.children;
-                    console.log('c ' + children.count, children);
-                    if (children.count === 5) {
-                        children[1].fillColor = ColorConfig.menuMouseEnter;
-                        children[3].visible = true;
-                        document.body.style.cursor = 'pointer';
-                        children[0].fillColor = ColorConfig.transparent;
-
-                        data = link.parseData(link);
-                        document.body.appendChild(form);
-                    }
-                }
-
-                this._topMenu.menu1.onMouseLeave = (event) => {
-                    const children: any = event.target.parent.children;
-                    console.log('c ' + children.count, children);
-                    if (children.count === 5) {
-                        children[1].fillColor = ColorConfig.button;
-                        children[3].visible = false;
-                        document.body.style.cursor = 'default';
-                        children[0].fillColor = ColorConfig.transparent;
-
-                        document.body.removeChild(form);
-                    }
-                }*/

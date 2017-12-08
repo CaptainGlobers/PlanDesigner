@@ -2,7 +2,7 @@ import { IShape } from './Shapes/IShape';
 import { ShapeBack } from './Shapes/ShapeBack';
 
 export interface ILevel {
-    level: number;
+    floorNumber: number;
     objects: Array<IShape>;
     back?: ShapeBack;
 }
