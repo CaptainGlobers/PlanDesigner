@@ -1,4 +1,4 @@
-enum ShapeType {
+export enum ShapeType {
     OuterWall = 1,
     InnerWall = 2,
     Column = 3,

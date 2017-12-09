@@ -7,12 +7,6 @@ import { ColorConfig } from './ColorConfig';
 import { ShapeBack } from '../Shapes/ShapeBack';
 
 export class ShapeDesigner {
-
-    private _graphicsSettings: GraphicsSettings;
-    constructor(graphicsSettings: GraphicsSettings) {
-        this._graphicsSettings = graphicsSettings;
-    }
-
     public originalPosition(x: number, y: number): IPoint {
         return MathCalc.getPosition(x, y, 1 / this.zoom, this.center);
     }
@@ -21,9 +15,9 @@ export class ShapeDesigner {
         return MathCalc.getPosition(x, y, this.zoom, this.center);
     }
 
-    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, windowOffsetX: number, windowOffsetY: number): void {
-        const offsetX: number = windowOffsetX - Math.round(windowWidth / 2) - 3;
-        const offsetY: number = windowOffsetY - Math.round(windowHeight / 2) - 5;
+    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number): void {
+        const offsetX: number = this.offset.x - Math.round(windowWidth / 2) - 3;
+        const offsetY: number = this.offset.y - Math.round(windowHeight / 2) - 5;
         const high: number = (this.zoom > 1.5) ? 50 : 100;
         const width: number = (this.zoom > 1.5) ? 50 : 100;
         const pool: Array<IPath> = [];
@@ -54,22 +48,20 @@ export class ShapeDesigner {
         shape.point1 = new Point(group.position.x, group.position.y);
     }
 
-    public drawControl(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawSquare(shape, offsetX, offsetY, 8, ColorConfig.control);
+    public drawControl(shape: IShape): void {
+        this.drawSquare(shape, 8, ColorConfig.control);
     }
 
-    public drawColumn(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawSquare(shape, offsetX, offsetY, 20, ColorConfig.column);
+    public drawColumn(shape: IShape): void {
+        this.drawSquare(shape, 20, ColorConfig.column);
     }
 
     private drawSquare(
         shape: IShape,
-        offsetX: number,
-        offsetY: number,
         size: number,
         fillColor: IColor | string
     ): void {
-        const point1: IPoint = this.newPosition(shape.point1.x + offsetX, shape.point1.y + offsetY);
+        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
         const width: number = size * this.zoom;
         const length: number = size * this.zoom;
 
@@ -82,13 +74,13 @@ export class ShapeDesigner {
             shape.renderObject.addChild(rect);
         } else {
             shape.renderObject =
-                ShapeDesignerHelper.createRenderObject([rect], this.menu, fillColor);
+                ShapeDesignerHelper.createRenderObject([rect], fillColor);
         }
     }
 
-    public drawWall(shape: IShape, offsetX: number, offsetY: number, color: IColor, desiredWidth: number): void {
-        const point1: IPoint = this.newPosition(shape.point1.x + offsetX, shape.point1.y + offsetY);
-        const point2: IPoint = this.newPosition(shape.point2.x + offsetX, shape.point2.y + offsetY);
+    public drawWall(shape: IShape, color: IColor, desiredWidth: number): void {
+        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
+        const point2: IPoint = this.newPosition(shape.point2.x + this.offset.x, shape.point2.y + this.offset.y);
         const vector: IPoint = new Point(point2.x - point1.x, point2.y - point1.y);
         const width: number = desiredWidth * this.zoom;
         const length: number = point2.getDistance(point1, false);
@@ -105,7 +97,7 @@ export class ShapeDesigner {
             ShapeDesignerHelper.addChildren(shape, text, rect);
         } else {
             shape.renderObject = new Group([rect, text]);
-            shape.renderObject.insertBelow(this.menu);
+            GraphicsSettings.current.insertBelowMenu(shape);
         }
 
         shape.renderObject.onMouseEnter = () => {
@@ -119,9 +111,10 @@ export class ShapeDesigner {
         };
     }
 
-    public drawShapeOnWall(shape: IShape, offsetX: number, offsetY: number, color2: IColor): void {
-        const point1: IPoint = this.newPosition(shape.point1.x + offsetX, shape.point1.y + offsetY);
-        const point2: IPoint = this.newPosition(shape.point2.x + offsetX, shape.point2.y + offsetY);
+    public drawShapeOnWall(shape: IShape, color2: IColor): void {
+        // TODO: duplicate drawWall
+        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
+        const point2: IPoint = this.newPosition(shape.point2.x + this.offset.x, shape.point2.y + this.offset.y);
         const vector: IPoint = new Point(point2.x - point1.x, point2.y - point1.y);
         const width: number = 20 * this.zoom;
         const smallWidth: number = 8 * this.zoom;
@@ -138,7 +131,7 @@ export class ShapeDesigner {
                 ShapeDesignerHelper.addChildren(shape, smallRect, rect);
             } else {
                 shape.renderObject =
-                    ShapeDesignerHelper.createRenderObject([rect, smallRect], this.menu);
+                    ShapeDesignerHelper.createRenderObject([rect, smallRect]);
             }
         } else {
             if (shape.renderObject && shape.renderObject.children[0]) {
@@ -147,13 +140,16 @@ export class ShapeDesigner {
                 shape.renderObject.addChild(rect);
             } else {
                 shape.renderObject =
-                    ShapeDesignerHelper.createRenderObject([rect], this.menu);
+                    ShapeDesignerHelper.createRenderObject([rect]);
             }
         }
     }
 
-    public drawBack(shape: ShapeBack, offsetX: number, offsetY: number, grid: IShape): void {
-        const point1: IPoint = this.newPosition(shape.point1.x + offsetX, shape.point1.y + offsetY);
+    public drawBack(shape: ShapeBack): void {
+
+        shape.point1 = this.originalPosition(this.center.x - this.offset.x * this.zoom, this.center.y - this.offset.y * this.zoom);
+
+        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
         const icon: IRaster = Raster.create(shape.img, point1, this.zoom * shape.scale);
 
         if (shape.renderObject) {
@@ -164,19 +160,19 @@ export class ShapeDesigner {
             group.opacity = 0.6;
             shape.type = 13;
             shape.renderObject = group;
-            group.insertBelow(grid.renderObject);
+            GraphicsSettings.current.insertBelowGrid(group);
         }
     }
 
     // ------------------------------
     private get zoom(): number {
-        return this._graphicsSettings.zoom;
+        return GraphicsSettings.current.zoom;
     }
     private get center(): IPoint {
-        return this._graphicsSettings.center;
+        return GraphicsSettings.current.center;
     }
-    private get menu(): IPath {
-        return this._graphicsSettings.menu;
+    private get offset(): IPoint {
+        return GraphicsSettings.current.offset;
     }
 
 }

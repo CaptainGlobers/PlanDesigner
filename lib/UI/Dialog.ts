@@ -2,15 +2,14 @@
 import { IShape } from '../Core/Shapes/IShape';
 import { MathCalc } from '../Core/MathCalc';
 import { ColorConfig } from '../Core/Render/ColorConfig';
+import { GraphicsSettings } from '../Core/Render/GraphicsSettings';
 
 export class Dialog {
-
-    private _centerX: number;
+    private _centerX: number = GraphicsSettings.current.center.x - 100;
     private _dialogHelper: HTMLElement;
     private _render: Render;
 
-    constructor(centerX: number, render: Render) {
-        this._centerX = centerX - 100;
+    constructor(render: Render) {
         this._render = render;
     }
 

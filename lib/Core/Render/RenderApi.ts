@@ -1,24 +1,15 @@
 import { IPoint, IGroup, Path, Point, IColor, IPath } from '../Primitive/Primitive';
-import { ShapeGrid } from '../Shapes/ShapeGrid';
 import { GraphicsSettings } from './GraphicsSettings';
 import { MenuDesigner } from './MenuDesigner';
 import { ShapeDesigner } from './ShapeDesigner';
 import { IShape } from '../Shapes/IShape';
 import { ShapeBack } from '../Shapes/ShapeBack';
 import { ColorConfig } from './ColorConfig';
+import { ShapeType } from '../Shapes/ShapeType';
 
 export class RenderApi {
-    private _grid: ShapeGrid;
-    private _graphicsSettings: GraphicsSettings;
     private _menuDesigner: MenuDesigner = new MenuDesigner();
-
-    private _shapeDesigner: ShapeDesigner;
-
-    constructor(graphicsSettings: GraphicsSettings, grid: IShape) {
-        this._graphicsSettings = graphicsSettings;
-        this._grid = grid;
-        this._shapeDesigner = new ShapeDesigner(this._graphicsSettings);
-    }
+    private _shapeDesigner: ShapeDesigner = new ShapeDesigner();
 
     public originalPosition(x: number, y: number): IPoint {
         return this._shapeDesigner.originalPosition(x, y);
@@ -28,150 +19,118 @@ export class RenderApi {
         return this._shapeDesigner.newPosition(x, y);
     }
 
-    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number, offsetX: number, offsetY: number): void {
-        this._shapeDesigner.drawGrid(shape, windowWidth, windowHeight, offsetX, offsetY);
+    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number): void {
+        this._shapeDesigner.drawGrid(shape, windowWidth, windowHeight);
     }
 
     public drawStartMenu(): IGroup {
-        return MenuDesigner.drawStartMenu(this._graphicsSettings.center);
+        return MenuDesigner.drawStartMenu(GraphicsSettings.current.center);
     }
 
     public drawMenu(count: number, width: number, hight: number): Array<IGroup> {
-        return this._menuDesigner.drawMenu(count, width, hight, this._graphicsSettings);
+        return this._menuDesigner.drawMenu(count, width, hight);
     }
 
     public drawLeftMenu(count: number): Array<IGroup> {
         return this._menuDesigner.drawLeftMenu(count);
     }
-    // --------------------------------------------------
-    public renderShape(shape: IShape, offsetX: number, offsetY: number, option: string): void;
-    public renderShape(shape: IShape, offsetX: number, offsetY: number): void;
-    public renderShape(shape: IShape, offsetX: number, offsetY: number, option?: string): void {
+
+    public renderShape(shape: IShape): void {
+        this.renderShapeInternal(shape);
+    }
+
+    private renderShapeInternal(shape: IShape, option?: string): void {
         let param: string = option;
-        if (shape.type === 1) {
-            this.drawOuterWall(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.OuterWall) {
+            this.drawWall(shape, ColorConfig.outerWall, 20);
         }
-        if (shape.type === 2) {
-            this.drawInnerWall(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.InnerWall) {
+            this.drawWall(shape, ColorConfig.innerWall, 20);
         }
-        if (shape.type === 3) {
-            this.drawColumn(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.Column) {
+            this._shapeDesigner.drawColumn(shape);
         }
-        if (shape.type === 4) {
-            this.drawPartition(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.Partition) {
+            this.drawWall(shape, ColorConfig.partition, 8);
         }
-        if (shape.type === 5) {
-            this.drawWindow(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.Window) {
+            this.drawShapeOnWall(shape, ColorConfig.window);
             param = 'noOne';
         }
-        if (shape.type === 6) {
-            this.drawDoor(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.Door) {
+            this.drawShapeOnWall(shape, ColorConfig.doorWay);
             param = 'noOne';
         }
-        if (shape.type === 7) {
-            this.drawDoorWay(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.DoorWay) {
+            this.drawShapeOnWall(shape, ColorConfig.transparent);
             param = 'noOne';
         }
-        if (shape.type === 11 || shape.type === 12) {
-            this.drawControl(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.ControlFirst || shape.type === ShapeType.ControlSecond) {
+            this.drawControl(shape);
         }
-        if (shape.type === 13) {
-            this.drawBack(shape as ShapeBack, offsetX, offsetY, this._grid);
+        if (shape.type === ShapeType.BackGround) {
+            this.drawBack(shape as ShapeBack);
         }
         if (param !== 'noOne') {
             if (shape.children) {
                 shape.children.forEach((child: IShape) => {
-
-                    if (child.type === 6 || child.type === 7 || child.type === 5) {
+                    if (child.type === ShapeType.Window || child.type === ShapeType.Door || child.type === ShapeType.DoorWay) {
                         const path: IPath = new Path([shape.point1, shape.point2]);
                         // TODO: Bug path.getPointAt(child.offset) = undefined
                         child.point1 = path.getPointAt(child.offset) || new Point(0, 0);
                         child.point2 = new Point(shape.point2);
                         path.remove();
                     }
-                    if (param === 'noControls') {
-                        if (child.type !== 11 && child.type !== 12) {
-                            this.renderShape(child, offsetX, offsetY);
-                        }
-                    } else {
-                        this.renderShape(child, offsetX, offsetY);
+                    if (param !== 'noControls' || (child.type !== ShapeType.ControlFirst && child.type !== ShapeType.ControlSecond)) {
+                        this.renderShape(child);
                     }
-
                 });
             }
-            if (param === 'noParents') { } else {
-                if (shape.parents) {
-                    shape.parents.forEach((parent: IShape) => {
-                        if (parent.type && shape === parent.children[0]) {
-                            parent.point1 = shape.point1;
-                            this.renderShape(parent, offsetX, offsetY, 'noControls');
-                        }
-                        if (parent.type && shape === parent.children[1]) {
-                            parent.point2 = shape.point1;
-                            this.renderShape(parent, offsetX, offsetY, 'noControls');
-                        }
-                    });
-                }
+
+            if (shape.parents) {
+                shape.parents.forEach((parent: IShape) => {
+                    if (parent.type && shape === parent.children[0]) {
+                        parent.point1 = shape.point1;
+                        this.renderShapeInternal(parent, 'noControls');
+                    }
+                    if (parent.type && shape === parent.children[1]) {
+                        parent.point2 = shape.point1;
+                        this.renderShapeInternal(parent, 'noControls');
+                    }
+                });
             }
+
         }
     }
 
-    public renderShapeBack(shape: IShape, offsetX: number, offsetY: number): void {
-        if (shape.type === 1) {
-            this.drawOuterWall(shape, offsetX, offsetY);
+    public renderBackgroundShapes(shape: IShape): void {
+        if (shape.type === ShapeType.OuterWall) {
+            this.drawWall(shape, ColorConfig.outerWall, 20);
         }
-        if (shape.type === 2) {
-            this.drawInnerWall(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.InnerWall) {
+            this.drawWall(shape, ColorConfig.innerWall, 20);
         }
-        if (shape.type === 3) {
-            this.drawColumn(shape, offsetX, offsetY);
+        if (shape.type === ShapeType.Column) {
+            this._shapeDesigner.drawColumn(shape);
         }
         if (shape.children) {
-            shape.children.forEach((child: IShape) => this.renderShapeBack(child, offsetX, offsetY));
+            shape.children.forEach((child: IShape) => this.renderBackgroundShapes(child));
         }
     }
 
-    public drawOuterWall(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawWall(shape, offsetX, offsetY, ColorConfig.outerWall, 20);
+    public drawBack(shape: ShapeBack): void {
+        this._shapeDesigner.drawBack(shape);
     }
 
-    public drawInnerWall(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawWall(shape, offsetX, offsetY, ColorConfig.innerWall, 20);
+    public drawControl(shape: IShape): void {
+        this._shapeDesigner.drawControl(shape);
     }
 
-    public drawPartition(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawWall(shape, offsetX, offsetY, ColorConfig.partition, 8);
+    private drawWall(shape: IShape, color: IColor, desiredWidth: number): void {
+        this._shapeDesigner.drawWall(shape, color, desiredWidth);
     }
 
-    public drawWindow(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawShapeOnWall(shape, offsetX, offsetY, ColorConfig.window);
-    }
-
-    public drawDoor(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawShapeOnWall(shape, offsetX, offsetY, ColorConfig.doorWay);
-    }
-
-    public drawDoorWay(shape: IShape, offsetX: number, offsetY: number): void {
-        this.drawShapeOnWall(shape, offsetX, offsetY, ColorConfig.transparent);
-    }
-
-    public drawControl(shape: IShape, offsetX: number, offsetY: number): void {
-        this._shapeDesigner.drawControl(shape, offsetX, offsetY);
-    }
-
-    public drawColumn(shape: IShape, offsetX: number, offsetY: number): void {
-        this._shapeDesigner.drawColumn(shape, offsetX, offsetY);
-    }
-
-    private drawWall(shape: IShape, offsetX: number, offsetY: number, color: IColor, desiredWidth: number): void {
-        this._shapeDesigner.drawWall(shape, offsetX, offsetY, color, desiredWidth);
-    }
-
-    private drawShapeOnWall(shape: IShape, offsetX: number, offsetY: number, color2: IColor): void {
-        this._shapeDesigner.drawShapeOnWall(shape, offsetX, offsetY, color2);
-    }
-
-    public drawBack(shape: ShapeBack, offsetX: number, offsetY: number, grid: IShape): void {
-        this._shapeDesigner.drawBack(shape, offsetX, offsetY, grid);
+    private drawShapeOnWall(shape: IShape, color2: IColor): void {
+        this._shapeDesigner.drawShapeOnWall(shape, color2);
     }
 }

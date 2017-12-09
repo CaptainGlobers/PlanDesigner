@@ -10,15 +10,14 @@ import { GraphicsSettings } from './GraphicsSettings';
 import { Shape } from '../Shapes/Shape';
 import { ShapeDesignerHelper } from './ShapeDesignerHelper';
 import { ColorConfig } from './ColorConfig';
+import { RenderHelper } from './RenderHelper';
 
 export class Render {
     private _canvas: HTMLCanvasElement;
     private _shapes: Array<IShape>;
     private _renderApi: RenderApi;
     private readonly _grid: IShape = new ShapeGrid();
-    private _selected: IShape = undefined;
-    private _selectedMode: boolean = true;
-    private _selectedPoint: IPoint = new Point(0, 0);
+    private _allowSelect: boolean = true;
     private _events: Events;
     private _dialog: Dialog;
     public back: ShapeBack;
@@ -29,8 +28,6 @@ export class Render {
     private _offsetY: number = 0;
 
     private _stageMoveController: StageMoveController;
-
-    private _graphicsSettings: GraphicsSettings;
 
     constructor(stageContainer: HTMLElement) {
         this._canvas = document.createElement('canvas');
@@ -46,11 +43,13 @@ export class Render {
         const rect: IPath = Path.Rectangle(new Point(0, 0), new Size(window.innerWidth, window.innerHeight));
         rect.fillColor = 'white';
 
-        this._graphicsSettings = new GraphicsSettings(new Point(this._canvas.width / 2, this._canvas.height / 2));
-        this._renderApi = new RenderApi(this._graphicsSettings, this._grid);
-        this._renderApi.drawGrid(this._grid, this._canvas.width, this._canvas.height, 0, 0);
+        GraphicsSettings.current.center = new Point(this._canvas.width / 2, this._canvas.height / 2);
+        GraphicsSettings.current.grid = this._grid;
 
-        this._dialog = new Dialog(this._graphicsSettings.centerX, this);
+        this._renderApi = new RenderApi();
+        this._renderApi.drawGrid(this._grid, this._canvas.width, this._canvas.height);
+
+        this._dialog = new Dialog(this);
 
         this._events = new Events(this);
         this._events.addMouseMoveListener((e: any) => this.moveShapeListener(e));
@@ -59,22 +58,23 @@ export class Render {
         const moveCallback: (offsetX: number, offsetY: number) => void = (offsetX: number, offsetY: number) => {
             this._offsetX = offsetX;
             this._offsetY = offsetY;
+
+            GraphicsSettings.current.offset.x = offsetX;
+            GraphicsSettings.current.offset.y = offsetY;
+
             this.reDraw();
         };
         this._stageMoveController = new StageMoveController(
-            this._canvas, this._graphicsSettings, moveCallback, (e: WheelEvent) => this.wheelListener(e));
+            this._canvas, moveCallback, (e: WheelEvent) => this.wheelListener(e));
     }
 
-    private get center(): IPoint {
-        return this._graphicsSettings.center;
+    private _selected: IShape = undefined;
+    private get selected(): IShape {
+        return this._selected;
     }
-
-    private get zoom(): number {
-        return this._graphicsSettings.zoom;
-    }
-
-    private set zoom(value: number) {
-        this._graphicsSettings.zoom = value;
+    private set selected(value: IShape) {
+        this._selected = value;
+        this._stageMoveController.isStageMoveable = value ? false : true;
     }
 
     private wheelListener(e: WheelEvent): void {
@@ -87,15 +87,6 @@ export class Render {
         this.reDraw();
     }
 
-    private set selected(value: IShape) {
-        this._selected = value;
-        this._stageMoveController.isStageMoveable = value ? false : true;
-    }
-
-    private get selected(): IShape {
-        return this._selected;
-    }
-
     public mouseDetect(): void {
         this._stageMoveController.mouseDetect();
     }
@@ -103,36 +94,9 @@ export class Render {
     public setZeroOffset(): void {
         this._stageMoveController.resetOffset();
     }
-    public deleteShape(shape: IShape): void {
-        let item: number = this._shapes.indexOf(shape);
-        if (item > -1) {
-            shape.renderObject.remove();
-            this.deleteShapes(shape.children, shape);
-            shape.children = undefined;
-            this._shapes.splice(item, 1);
-        } else if ((shape.type === 5 || shape.type === 6 || shape.type === 7) && shape.parents) {
-            item = shape.parents[0].children.indexOf(shape);
-            if (item > -1) {
-                shape.renderObject.remove();
-                shape.parents[0].children.splice(item, 1);
-            }
-        } else {
-            console.warn('ex: delete Shape not found shape');
-        }
-    }
 
-    public deleteShapes(shapes: Array<IShape>, parent?: IShape): void {
-        if (shapes) {
-            shapes.forEach((shape: IShape) => {
-                if (shape.parents && shape.parents.length < 2) { // not del control
-                    shape.renderObject.remove();
-                    this.deleteShapes(shape.children);
-                } else if (parent) {
-                    const item: number = shape.parents.indexOf(parent);
-                    shape.parents.splice(item, 1);
-                }
-            });
-        }
+    public deleteShape(shape: IShape): void {
+        RenderHelper.deleteShapeInternal(shape, this._shapes);
     }
 
     public splitWall(shape: IShape): void {
@@ -143,7 +107,7 @@ export class Render {
 
         const newShape: IShape = new Shape(point, point2, shape.type);
         this._shapes.push(newShape);
-        this.createShape(newShape);
+        this.createShapeControlsAndRender(newShape);
 
         newShape.children[1].renderObject.remove();
         newShape.children[1] = shape.children[1];
@@ -156,8 +120,8 @@ export class Render {
 
         newShape.children[0].parents.push(shape);
         newShape.children[1].parents.push(newShape);
-        newShape.children[0].renderObject.insertAbove(this._menu[0]);
-        newShape.children[1].renderObject.insertAbove(this._menu[0]);
+        this.insertAboveMenu(newShape.children[0]);
+        this.insertAboveMenu(newShape.children[1]);
     }
 
     public clear(): void {
@@ -175,12 +139,12 @@ export class Render {
 
     public inBack(): void {
         this.back.scale += 0.01;
-        this._renderApi.drawBack(this.back, this._offsetX, this._offsetY, this._grid);
+        this._renderApi.drawBack(this.back);
     }
 
     public outBack(): void {
         this.back.scale -= 0.01;
-        this._renderApi.drawBack(this.back, this._offsetX, this._offsetY, this._grid);
+        this._renderApi.drawBack(this.back);
     }
 
     public delBack(): void {
@@ -189,7 +153,7 @@ export class Render {
         }
     }
 
-    public hideBack(): void {
+    public hideBackground(): void {
         this.back.renderObject.opacity = 0;
     }
 
@@ -200,9 +164,8 @@ export class Render {
     public loadBack(loadSuccess: Function): void {
         const fileReader: FileReader = new FileReader();
         fileReader.onload = (e: any) => {
-            this.back.point1 = this._renderApi.originalPosition(this.center.x - this._offsetX * this.zoom, this.center.y - this._offsetY * this.zoom);
             this.back.img = e.target.result;
-            this._renderApi.drawBack(this.back, this._offsetX, this._offsetY, this._grid);
+            this._renderApi.drawBack(this.back);
             loadSuccess();
         };
         fileReader.onerror = (e: any) => alert('File not read ' + e.target.error.code);
@@ -216,7 +179,7 @@ export class Render {
     public setLevel(): void {
         const createShapes: Function = (shape: IShape) => {
             if (shape.type === 11 || shape.type === 12) {
-                shape.renderObject.insertAbove(this._menu[0]);
+                this.insertAboveMenu(shape);
             }
             if (shape.children) {
                 shape.children.forEach((item: IShape) => createShapes(item));
@@ -231,10 +194,10 @@ export class Render {
         if (this._shapes) {
             this._shapes.forEach((item: IShape) => this.renderShape(item));
         }
-        this._renderApi.drawGrid(this._grid, this._canvas.width, this._canvas.height, this._offsetX, this._offsetY);
+        this._renderApi.drawGrid(this._grid, this._canvas.width, this._canvas.height);
         this.backShapesDraw(this.backShapes);
         if (this.back && this.back.img) {
-            this._renderApi.drawBack(this.back, this._offsetX, this._offsetY, this._grid);
+            this._renderApi.drawBack(this.back);
         }
         paper.project.view.update();
     }
@@ -243,7 +206,7 @@ export class Render {
         if (backShapes) {
             backShapes.forEach((shape: IShape) => {
                 if (shape.type === 1 || shape.type === 2 || shape.type === 3) {
-                    this._renderApi.renderShapeBack(shape, this._offsetX, this._offsetY);
+                    this._renderApi.renderBackgroundShapes(shape);
                     shape.renderObject.fillColor = ColorConfig.transparent;
                     shape.renderObject.insertBelow(this._grid.renderObject);
                     shape.renderObject.onMouseEnter = undefined;
@@ -254,7 +217,7 @@ export class Render {
     }
 
     private renderShape(shape: IShape): void {
-        this._renderApi.renderShape(shape, this._offsetX, this._offsetY);
+        this._renderApi.renderShape(shape);
     }
 
     private moveShape(shape: IShape, moveX: number, moveY: number): void {
@@ -277,8 +240,6 @@ export class Render {
         this.back.renderObject.insertAbove(rect);
 
         this.back.renderObject.onMouseDown = (event: any) => {
-            this._selectedPoint.x = event.point.x - this._offsetX * this.zoom;
-            this._selectedPoint.y = event.point.y - this._offsetY * this.zoom;
             this.selected = this.back;
         };
 
@@ -296,8 +257,8 @@ export class Render {
     }
 
     private moveShapeListener(event: any): void {
-        if (this.selected && this._selectedMode) {
-            const currentPoint: IPoint = new Point(event.point.x - this._offsetX * this.zoom, event.point.y - this._offsetY * this.zoom);
+        if (this.selected && this._allowSelect) {
+            const currentPoint: IPoint = new Point(this.getEventPointX(event.point), this.getEventPointY(event.point));
             const moveX: number = currentPoint.x - this._startMove.x;
             const moveY: number = currentPoint.y - this._startMove.y;
             this.moveShape(this.selected, moveX, moveY);
@@ -311,12 +272,9 @@ export class Render {
     public setShapeHandlers(newShape: IShape): IShape {
         const selectShape: Function = (event: any, callback: any) => {
             if (event.event.button === 0) {
-                this._selectedPoint.x = event.point.x - this._offsetX * this.zoom;
-                this._selectedPoint.y = event.point.y - this._offsetY * this.zoom;
                 this.selected = newShape;
 
-                this._startMove.x = event.point.x - this._offsetX * this.zoom;
-                this._startMove.y = event.point.y - this._offsetY * this.zoom;
+                this._startMove = new Point(this.getEventPointX(event.point), this.getEventPointY(event.point));
                 this._startPoint1 = new Point(this.selected.point1);
                 this._startPoint2 = new Point(this.selected.point2);
             } else if (event.event.button === 2) {
@@ -339,7 +297,7 @@ export class Render {
             };
         }
 
-        const saveAsFunct: Function = newShape.renderObject.onMouseLeave;
+        const saveAsFunc: Function = newShape.renderObject.onMouseLeave;
         newShape.renderObject.onMouseLeave = () => {
             if (this.selected) {
                 this.selected.point1.x = Math.round(this.selected.point1.x);
@@ -348,7 +306,7 @@ export class Render {
                 this.selected.point2.y = Math.round(this.selected.point2.y);
             }
             this.selected = undefined;
-            saveAsFunct();
+            saveAsFunc();
         };
         newShape.renderObject.onMouseUp = () => {
             if (this.selected) {
@@ -362,7 +320,7 @@ export class Render {
         return newShape;
     }
 
-    public createShape(newShape: IShape, notDraw: boolean = false): IShape {
+    public createShapeControlsAndRender(newShape: IShape, notDraw: boolean = false): void {
         const type: number = newShape.type;
         if (!notDraw) {
             this.renderShape(newShape);
@@ -378,8 +336,8 @@ export class Render {
             control1.parents = new Array();
             control2.parents = new Array();
             if (!notDraw) {
-                this._renderApi.drawControl(control1, this._offsetX, this._offsetY);
-                this._renderApi.drawControl(control2, this._offsetX, this._offsetY);
+                this._renderApi.drawControl(control1);
+                this._renderApi.drawControl(control2);
                 control1.renderObject.insertAbove(newShape.renderObject);
                 control2.renderObject.insertAbove(newShape.renderObject);
                 this.setShapeHandlers(control1);
@@ -392,11 +350,10 @@ export class Render {
             newShape.children.push(control1);
             newShape.children.push(control2);
         }
-        return newShape;
     }
 
     public getRound(point: IPoint): IPoint {
-        const original: IPoint = this._renderApi.originalPosition(point.x - this._offsetX * this.zoom, point.y - this._offsetY * this.zoom);
+        const original: IPoint = this.originalPosition(point);
         original.x = Math.round(original.x / Render.round) * Render.round;
         original.y = Math.round(original.y / Render.round) * Render.round;
 
@@ -410,7 +367,7 @@ export class Render {
     public createWall(isChain: boolean, type: number): any {
         this.cancelCreateWallHandler();
 
-        this._selectedMode = false;
+        this._allowSelect = false;
 
         let line: IPath;
         let startPoint: IPoint = undefined;
@@ -441,7 +398,7 @@ export class Render {
             line = undefined;
             this._events.removeMouseDownListener(onMouseDown);
             this._events.removeMouseMoveListener(onMouseMove);
-            this._selectedMode = true;
+            this._allowSelect = true;
         };
 
         if (this._drawWallMouseDownHandler || this._drawWallMouseMoveHandler) {
@@ -451,16 +408,16 @@ export class Render {
         this._drawWallMouseDownHandler = (event: any) => {
             startPoint = this.getRound(event.point);
             if (line) {
-                const point1: IPoint = this._renderApi.originalPosition(line.segments[0].point.x - this._offsetX * this.zoom, line.segments[0].point.y - this._offsetY * this.zoom);
-                const point2: IPoint = this._renderApi.originalPosition(line.segments[1].point.x - this._offsetX * this.zoom, line.segments[1].point.y - this._offsetY * this.zoom);
+                const point1: IPoint = this.originalPosition(line.segments[0].point);
+                const point2: IPoint = this.originalPosition(line.segments[1].point);
                 const newShape: IShape = new Shape(point1, point2, type);
                 this._shapes.push(newShape);
-                this.createShape(newShape);
+                this.createShapeControlsAndRender(newShape);
                 if (startShape) {
                     if (startShape.type === 11 || startShape.type === 12) {
                         newShape.children[0].renderObject.remove();
                         newShape.children[0] = startShape;
-                        startShape.renderObject.insertAbove(this._menu[0]);
+                        this.insertAboveMenu(startShape);
                         startShape.parents.push(newShape);
                         startShape = undefined;
                     }
@@ -469,7 +426,7 @@ export class Render {
                     if (this.selected.type === 11 || this.selected.type === 12) {
                         newShape.children[1].renderObject.remove();
                         newShape.children[1] = this.selected;
-                        this.selected.renderObject.insertAbove(this._menu[0]);
+                        this.insertAboveMenu(this.selected);
                         this.selected.parents.push(newShape);
                     }
                 }
@@ -478,7 +435,7 @@ export class Render {
                     newShape.children[0].renderObject.remove();
                     newShape.children[0] = chainControl;
                     chainControl.parents.push(newShape);
-                    chainControl.renderObject.insertAbove(this._menu[0]);
+                    this.insertAboveMenu(chainControl);
                 }
                 line.remove();
                 line = undefined;
@@ -554,19 +511,19 @@ export class Render {
 
     public createColumn(): any {
         this.cancelCreateWallHandler();
-        this._selectedMode = false;
+        this._allowSelect = false;
         let cancelEvent: () => void;
 
         const onMouseDown: (event: any) => void = (event: any) => {
             if (event.point.y > 35) {
-                const point1: IPoint = this._renderApi.originalPosition(event.point.x - this._offsetX * this.zoom, event.point.y - this._offsetY * this.zoom);
+                const point1: IPoint = this.originalPosition(event.point);
                 point1.x = Math.round(point1.x / Render.round) * Render.round;
                 point1.y = Math.round(point1.y / Render.round) * Render.round;
 
                 const point2: IPoint = new Point(point1);
                 const newShape: IShape = new Shape(point1, point2, 3);
                 this._shapes.push(newShape);
-                this.createShape(newShape);
+                this.createShapeControlsAndRender(newShape);
             } else {
                 cancelEvent();
             }
@@ -574,7 +531,7 @@ export class Render {
 
         cancelEvent = () => {
             this._events.removeMouseDownListener(onMouseDown);
-            this._selectedMode = true;
+            this._allowSelect = true;
         };
 
         this._events.clearMouseDownListener();
@@ -583,14 +540,14 @@ export class Render {
 
     public createShapeOnWall(type: number): any {
         this.cancelCreateWallHandler();
-        this._selectedMode = false;
+        this._allowSelect = false;
         let cancelEvent: () => void;
 
         const onMouseDown: (event: any) => void = (event: any) => {
             if (event.event.button === 0) {
                 if (event.point.y > 35 && this.selected && (this.selected.type === 1 || this.selected.type === 2 || this.selected.type === 4)) {
                     const selected: IShape = this.selected;
-                    const point1: IPoint = this._renderApi.originalPosition(event.point.x - this._offsetX * this.zoom, event.point.y - this._offsetY * this.zoom);
+                    const point1: IPoint = this.originalPosition(event.point);
                     const point2: IPoint = new Point(selected.point2);
                     const newPoint: IPoint = ShapeDesignerHelper.newPointOnLine(selected, point1);
                     const newShape: IShape = new Shape(newPoint, point2, type);
@@ -601,7 +558,7 @@ export class Render {
                     newShape.width = 800;
                     newShape.height = 2100;
                     newShape.plane = 0;
-                    this.createShape(newShape);
+                    this.createShapeControlsAndRender(newShape);
                     this._dialog.createDialog2(() => { }, newShape);
                 } else {
                     cancelEvent();
@@ -611,18 +568,15 @@ export class Render {
 
         cancelEvent = () => {
             this._events.removeMouseDownListener(onMouseDown);
-            this._selectedMode = true;
+            this._allowSelect = true;
         };
 
         this._events.clearMouseDownListener();
         this._events.addMouseDownListener(onMouseDown);
     }
 
-    private _menu: Array<any>;
     public createMenu(count: number): Array<IGroup> {
-        this._menu = this._renderApi.drawMenu(count, this._canvas.width, 40);
-
-        return this._menu;
+        return this._renderApi.drawMenu(count, this._canvas.width, 40);
     }
 
     public createLeftMenu(count: number): Array<IGroup> {
@@ -633,5 +587,33 @@ export class Render {
         return this._renderApi.drawStartMenu();
     }
 
-    // private _dialogHelper: HTMLElement;
+    private getEventPointX(point: IPoint): number {
+        return point.x - this._offsetX * this.zoom;
+    }
+
+    private getEventPointY(point: IPoint): number {
+        return point.y - this._offsetY * this.zoom;
+    }
+
+    private originalPosition(point: IPoint): IPoint {
+        return this._renderApi.originalPosition(this.getEventPointX(point), this.getEventPointY(point));
+    }
+
+    // ---------
+
+    private get center(): IPoint {
+        return GraphicsSettings.current.center;
+    }
+
+    private get zoom(): number {
+        return GraphicsSettings.current.zoom;
+    }
+
+    private set zoom(value: number) {
+        GraphicsSettings.current.zoom = value;
+    }
+
+    private insertAboveMenu(shape: IShape): void {
+        GraphicsSettings.current.insertAboveMenu(shape);
+    }
 }

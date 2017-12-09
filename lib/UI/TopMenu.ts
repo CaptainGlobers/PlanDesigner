@@ -53,7 +53,7 @@ export class TopMenu {
         this._menu[5].children[3].children[0].children[1].content = 'Загрузить';
         this._menu[5].children[3].children[0].onClick = () => {
             this._render.cancelCreateWallHandler();
-            if (this._loadBackground()) {
+            if (!this._hasBackground()) {
                 const loadSuccess: Function = () => this.showBackMenu();
                 this._render.loadBack(loadSuccess);
             } else {
@@ -63,7 +63,8 @@ export class TopMenu {
         this._menu[5].children[3].children[1].children[1].content = 'Удалить';
         this._menu[5].children[3].children[1].onClick = () => {
             this._render.cancelCreateWallHandler();
-            if (this._backgroundRemove()) {
+            if (this._hasBackground()) {
+                this._backgroundRemove();
                 this.hideBackMenu();
             } else {
                 alert('На данном уровне подложки нет');
@@ -73,7 +74,7 @@ export class TopMenu {
         this._menu[5].children[3].children[2].onClick = () => {
             this._render.cancelCreateWallHandler();
             if (this._hasBackground()) {
-                this._render.hideBack();
+                this._render.hideBackground();
                 this.hideBackMenu();
             }
         };
@@ -126,10 +127,6 @@ export class TopMenu {
         this._menu[8].visible = false;
     }
 
-    public get menu1(): any {
-        return this._menu[1];
-    }
-
     private _newProject: () => void;
     public setFnNewProject(fn: () => void): void {
         this._newProject = fn;
@@ -145,18 +142,13 @@ export class TopMenu {
         this._loadProject = fn;
     }
 
-    private _loadBackground: () => boolean;
-    public setFnLoadBackground(fn: () => boolean): void {
-        this._loadBackground = fn;
-    }
-
-    private _backgroundRemove: () => boolean;
-    public setFnBackgroundRemove(fn: () => boolean): void {
+    private _backgroundRemove: () => void;
+    public setFnBackgroundRemove(fn: () => void): void {
         this._backgroundRemove = fn;
     }
 
     private _hasBackground: () => boolean;
-    public setFnHasground(fn: () => boolean): void {
+    public setFnHasBackground(fn: () => boolean): void {
         this._hasBackground = fn;
     }
 

@@ -1,11 +1,11 @@
+import { ShapeType } from './ShapeType';
 import { IPoint, IGroup } from '../Primitive/Primitive';
 
 export interface IShape {
-    type: number;
+    type: ShapeType;
     point1: IPoint;
     point2: IPoint;
     children: Array<IShape>;
-    valid: boolean;
     renderObject: IGroup;
     parents: Array<IShape>;
     offset: number;

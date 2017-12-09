@@ -1,10 +1,10 @@
 import { ILevel } from './Core/ILevel';
 import { DataConverter } from './Core/DataConverter/DataConverter';
 
-export class StageHelper {
+export class FileHelper {
     public static loadProject(onloadFn: (e: any) => void): void {
         const fileReader: FileReader = new FileReader();
-        fileReader.onload = (e: any) => onloadFn(e); //this.initProject(e.target.result);
+        fileReader.onload = (e: any) => onloadFn(e);
         fileReader.onerror = (e: any) => alert('File not read ' + e.target.error.code);
 
         const input: HTMLInputElement = document.createElement('input');
@@ -26,7 +26,7 @@ export class StageHelper {
             event.preventDefault();
             const foo: any = (window as any).saveAs;
             foo(new Blob([data]), filename);
-        }
+        };
         input.click();
     }
 }

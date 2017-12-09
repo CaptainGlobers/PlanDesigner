@@ -3,7 +3,7 @@ import { Render } from './Core/Render/Render';
 import { JsonConverter } from './Core/DataConverter/JsonConverter';
 import { ShapeBack } from './Core/Shapes/ShapeBack';
 import { TopMenu } from './UI/TopMenu';
-import { StageHelper } from './StageHelper';
+import { FileHelper } from './FileHelper';
 import { DataConverter } from './Core/DataConverter/DataConverter';
 
 export class Stages {
@@ -24,9 +24,6 @@ export class Stages {
         if (this._levels[value]) {
             this._currentLevel = value;
             this._render.clear();
-            if (!this._levels[this._currentLevel].back) {
-                this._levels[this._currentLevel].back = new ShapeBack();
-            }
             if (this._levels[this._currentLevel].back.img) {
                 this._topMenu.showBackMenu();
             } else {
@@ -38,13 +35,13 @@ export class Stages {
             this._render.setLevel();
             this._leftMenu[2].children[2].content = (this._currentLevel !== 0) ? this._currentLevel : -1;
         } else {
-            console.log('Level ' + value + ' not exist');
+            console.warn(`Level ${value} not exist`);
         }
     }
 
     private loadProject(): void {
         this._render.cancelCreateWallHandler();
-        StageHelper.loadProject((e: any) => {
+        FileHelper.loadProject((e: any) => {
             const fileContent: string = e.target.result;
             this._levels = JsonConverter.getLevels(fileContent, this._render);
             this.initMenu();
@@ -54,15 +51,12 @@ export class Stages {
     /*  TODO: replace saveHack
         private saveProject(): void {
             this._render.cancelCreateWallHandler();
-            StageHelper.saveProject(this._levels);
+            FileHelper.saveProject(this._levels);
         }
         */
 
     private saveHack(): void {
-        // FF and Opera bug-fix saveProject not work
-
         const filename: string = 'pro.json';
-        // let data: string;
         const form: HTMLFormElement = document.createElement('form');
         const input: HTMLInputElement = document.createElement('input');
         input.type = 'submit';
@@ -126,7 +120,8 @@ export class Stages {
         const newFloorNumber: number = this._currentLevel + (increase ? 1 : -1);
         this._levels[newFloorNumber] = {
             floorNumber: newFloorNumber,
-            objects: new Array()
+            objects: new Array(),
+            back: new ShapeBack()
         };
 
         this.selectLevel(newFloorNumber);
@@ -152,21 +147,12 @@ export class Stages {
         // this._topMenu.setFnSaveProject((): void => this.saveProject());
         this._topMenu.setFnLoadProject((): void => this.loadProject());
 
-        this._topMenu.setFnLoadBackground((): boolean =>
-            !this._levels[this._currentLevel].back.img);
-        // TODO: Remove setFnLoadBackground
-        this._topMenu.setFnHasground((): boolean =>
+        this._topMenu.setFnHasBackground((): boolean =>
             this._levels[this._currentLevel].back.img);
 
-        this._topMenu.setFnBackgroundRemove((): boolean => {
-            const result: boolean = !!this._levels[this._currentLevel].back.img;
-            if (result) {
-                this._render.delBack();
-                this._levels[this._currentLevel].back = new ShapeBack();
-                this._render.back = this._levels[this._currentLevel].back;
-            }
-
-            return result;
+        this._topMenu.setFnBackgroundRemove((): void => {
+            this._render.delBack();
+            this._render.back = this._levels[this._currentLevel].back = new ShapeBack();
         });
     }
 }

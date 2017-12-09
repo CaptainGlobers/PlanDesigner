@@ -4,6 +4,7 @@ import { IShape } from '../Shapes/IShape';
 import { Shape } from '../Shapes/Shape';
 import { Render } from '../Render/Render';
 import { MathCalc } from '../MathCalc';
+import { ShapeBack } from '../Shapes/ShapeBack';
 
 export class JsonConverter {
 
@@ -14,7 +15,8 @@ export class JsonConverter {
         data.levels.forEach((level: any) => {
             result[level.floorNumber] = {
                 floorNumber: level.floorNumber,
-                objects: JsonConverter.getObjects(level.objects, undefined, render, zeroPoint)
+                objects: JsonConverter.getObjects(level.objects, undefined, render, zeroPoint),
+                back: new ShapeBack()
             };
         });
 
@@ -41,7 +43,7 @@ export class JsonConverter {
                     shape.height = object.height;
                     shape.width = width * 10;
                 }
-                render.createShape(shape, true);
+                render.createShapeControlsAndRender(shape, true);
                 result.push(shape);
                 if (object.children) {
                     JsonConverter.getObjects(object.children, shape, render, zeroPoint);

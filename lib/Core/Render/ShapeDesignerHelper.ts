@@ -1,3 +1,4 @@
+import { GraphicsSettings } from './GraphicsSettings';
 import { IPoint, Point, IPath, Size, IGroup, Group, Path, ISize, IItem, IColor } from '../Primitive/Primitive';
 import { MathCalc } from '../MathCalc';
 import { IShape } from '../Shapes/IShape';
@@ -42,7 +43,7 @@ export class ShapeDesignerHelper {
         return rect;
     }
 
-    public static createRenderObject(items: Array<any>, menu: IPath, colorLeave?: IColor | string): IGroup {
+    public static createRenderObject(items: Array<any>, colorLeave?: IColor | string): IGroup {
         const renderObject: IGroup = new Group(items);
         if (!colorLeave) {
             renderObject.onMouseEnter = () => renderObject.strokeColor = ColorConfig.mouseEnter;
@@ -51,9 +52,7 @@ export class ShapeDesignerHelper {
             renderObject.onMouseEnter = () => renderObject.children[0].fillColor = ColorConfig.mouseEnter;
             renderObject.onMouseLeave = () => renderObject.children[0].fillColor = colorLeave;
         }
-        if (menu) {
-            renderObject.insertBelow(menu);
-        }
+        GraphicsSettings.current.insertAboveMenu(undefined, renderObject);
 
         return renderObject;
     }

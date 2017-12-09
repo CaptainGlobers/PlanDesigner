@@ -21,16 +21,12 @@ export class StageMoveController {
     private _canvas: HTMLCanvasElement;
     private _isStageMoveable: boolean = true;
 
-    private _graphicsSettings: GraphicsSettings;
-
     constructor(
         canvas: HTMLCanvasElement,
-        graphicsSettings: GraphicsSettings,
         moveCallback: (offsetX: number, offsetY: number) => void,
         wheelListener: (e: WheelEvent) => void
     ) {
         this._canvas = canvas;
-        this._graphicsSettings = graphicsSettings;
         this._moveCallback = moveCallback;
         this._wheelListener = wheelListener;
     }
@@ -39,10 +35,6 @@ export class StageMoveController {
         this._offsetX = 0;
         this._offsetY = 0;
         this._moveCallback(this._offsetX, this._offsetY);
-    }
-
-    private get zoom(): number {
-        return this._graphicsSettings.zoom;
     }
 
     public set isStageMoveable(value: boolean) {
@@ -122,5 +114,10 @@ export class StageMoveController {
         this._canvas.addEventListener('mouseup', (event: MouseEvent) => this.mouseUpListener(event), false);
         this._canvas.addEventListener('mouseout', (event: MouseEvent) => this.mouseOutListener(event), false);
         this._canvas.addEventListener('mousewheel', (event: WheelEvent) => this._wheelListener(event), false);
+    }
+
+    //////
+    private get zoom(): number {
+        return GraphicsSettings.current.zoom;
     }
 }

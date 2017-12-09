@@ -1,8 +1,9 @@
 ﻿import { IPoint, Point, IGroup } from '../Primitive/Primitive';
 import { IShape } from './IShape';
+import { ShapeType } from './ShapeType';
 
 export class ShapeBack implements IShape {
-    public type: number = undefined;
+    public type: ShapeType = ShapeType.BackGround;
     public point1: IPoint;
     public point2: IPoint;
     public children: Array<IShape>;

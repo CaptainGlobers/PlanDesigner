@@ -6,14 +6,14 @@ export class MenuDesigner {
 
     private _menuGroup: IGroup;
 
-    public drawMenu(count: number, width: number, hight: number, graphicsSettings: GraphicsSettings): Array<IGroup> {
+    public drawMenu(count: number, width: number, hight: number): Array<IGroup> {
         const menu: IPath = Path.Rectangle(new Point(0, 0), new Point(width, 40));
         menu.fillColor = ColorConfig.button;
 
         // TODO: del dependencies
         this._menuGroup = new Group([menu]);
         // TODO: del dependencies
-        graphicsSettings.menu = menu;
+        GraphicsSettings.current.menu = menu;
 
         return MenuDesigner.drawMenuItemInner(count, width, hight, menu, this._menuGroup);
     }
