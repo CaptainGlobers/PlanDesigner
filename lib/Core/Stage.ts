@@ -1,18 +1,18 @@
-﻿import { IPoint, Point, IPath, Size, IGroup, Path } from '../Primitive/Primitive';
-import { IShape } from '../Shapes/IShape';
-import { RenderApi } from './RenderApi';
-import { ShapeGrid } from '../Shapes/ShapeGrid';
-import { Events } from '../Events';
-import { Dialog } from '../../UI/Dialog';
-import { ShapeBack } from '../Shapes/ShapeBack';
-import { StageMoveController } from '../StageMoveController';
-import { GraphicsSettings } from './GraphicsSettings';
-import { Shape } from '../Shapes/Shape';
-import { ShapeDesignerHelper } from './ShapeDesignerHelper';
-import { ColorConfig } from './ColorConfig';
-import { RenderHelper } from './RenderHelper';
+﻿import { IShape } from './Shapes/IShape';
+import { RenderApi } from './Render/RenderApi';
+import { ShapeGrid } from './Shapes/ShapeGrid';
+import { Events } from './Events';
+import { Dialog } from '../UI/Dialog';
+import { ShapeBack } from './Shapes/ShapeBack';
+import { StageMoveController } from './StageMoveController';
+import { IPath, Path, Point, Size, IPoint, IGroup } from './Primitive/Primitive';
+import { GraphicsSettings } from './Render/GraphicsSettings';
+import { RenderHelper } from './Render/RenderHelper';
+import { Shape } from './Shapes/Shape';
+import { ShapeDesignerHelper } from './Render/ShapeDesignerHelper';
+import { ColorConfig } from './Render/ColorConfig';
 
-export class Render {
+export class Stage {
     private _canvas: HTMLCanvasElement;
     private _shapes: Array<IShape>;
     private _renderApi: RenderApi;
@@ -51,7 +51,7 @@ export class Render {
 
         this._dialog = new Dialog(this);
 
-        this._events = new Events(this);
+        this._events = new Events();
         this._events.addMouseMoveListener((e: any) => this.moveShapeListener(e));
         window.setInterval(() => this.reDraw(), 5000);
 
@@ -221,10 +221,10 @@ export class Render {
     }
 
     private moveShape(shape: IShape, moveX: number, moveY: number): void {
-        shape.point1.x = Math.round((this._startPoint1.x + moveX / this.zoom) / Render.round) * Render.round;
-        shape.point2.x = Math.round((this._startPoint2.x + moveX / this.zoom) / Render.round) * Render.round;
-        shape.point1.y = Math.round((this._startPoint1.y + moveY / this.zoom) / Render.round) * Render.round;
-        shape.point2.y = Math.round((this._startPoint2.y + moveY / this.zoom) / Render.round) * Render.round;
+        shape.point1.x = Math.round((this._startPoint1.x + moveX / this.zoom) / Stage.round) * Stage.round;
+        shape.point2.x = Math.round((this._startPoint2.x + moveX / this.zoom) / Stage.round) * Stage.round;
+        shape.point1.y = Math.round((this._startPoint1.y + moveY / this.zoom) / Stage.round) * Stage.round;
+        shape.point2.y = Math.round((this._startPoint2.y + moveY / this.zoom) / Stage.round) * Stage.round;
         if (shape.type === 6 || shape.type === 7 || shape.type === 5) {
             shape.point1 = ShapeDesignerHelper.newPointOnLine(shape.parents[0], shape.point1);
             shape.point2 = new Point(shape.parents[0].point2.x, shape.parents[0].point2.y);
@@ -354,8 +354,8 @@ export class Render {
 
     public getRound(point: IPoint): IPoint {
         const original: IPoint = this.originalPosition(point);
-        original.x = Math.round(original.x / Render.round) * Render.round;
-        original.y = Math.round(original.y / Render.round) * Render.round;
+        original.x = Math.round(original.x / Stage.round) * Stage.round;
+        original.y = Math.round(original.y / Stage.round) * Stage.round;
 
         return this._renderApi.newPosition(original.x + this._offsetX, original.y + this._offsetY);
     }
@@ -517,8 +517,8 @@ export class Render {
         const onMouseDown: (event: any) => void = (event: any) => {
             if (event.point.y > 35) {
                 const point1: IPoint = this.originalPosition(event.point);
-                point1.x = Math.round(point1.x / Render.round) * Render.round;
-                point1.y = Math.round(point1.y / Render.round) * Render.round;
+                point1.x = Math.round(point1.x / Stage.round) * Stage.round;
+                point1.y = Math.round(point1.y / Stage.round) * Stage.round;
 
                 const point2: IPoint = new Point(point1);
                 const newShape: IShape = new Shape(point1, point2, 3);

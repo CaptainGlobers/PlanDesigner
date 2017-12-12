@@ -1,3 +1,3 @@
-import { Stages } from '../lib/Stage';
+import { PlanDesigner } from '../lib/PlanDesigner';
 
-new Stages(document.getElementById('stageContainer'));
+new PlanDesigner(document.getElementById('stageContainer'));

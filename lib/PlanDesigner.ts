@@ -1,38 +1,38 @@
 import { ILevel } from './Core/ILevel';
-import { Render } from './Core/Render/Render';
+import { Stage } from './Core/Stage';
 import { JsonConverter } from './Core/DataConverter/JsonConverter';
 import { ShapeBack } from './Core/Shapes/ShapeBack';
 import { TopMenu } from './UI/TopMenu';
 import { FileHelper } from './FileHelper';
 import { DataConverter } from './Core/DataConverter/DataConverter';
 
-export class Stages {
+export class PlanDesigner {
     private _levels: Array<ILevel>;
-    private _render: Render;
+    private _stage: Stage;
     private _startMenu: any;
     private _leftMenu: any;
     private _currentLevel: number = 0;
 
     constructor(stageContainer: HTMLElement) {
-        this._render = new Render(stageContainer);
+        this._stage = new Stage(stageContainer);
         this.initStartMenu();
         this.saveHack();
     }
 
     private selectLevel(value: number): void {
-        this._render.cancelCreateWallHandler();
+        this._stage.cancelCreateWallHandler();
         if (this._levels[value]) {
             this._currentLevel = value;
-            this._render.clear();
+            this._stage.clear();
             if (this._levels[this._currentLevel].back.img) {
                 this._topMenu.showBackMenu();
             } else {
                 this._topMenu.hideBackMenu();
             }
-            this._render.back = this._levels[this._currentLevel].back;
-            this._render.backShapes = (this._levels[this._currentLevel - 1] && this._levels[this._currentLevel - 1].objects) ? this._levels[this._currentLevel - 1].objects : undefined;
-            this._render.shapes = this._levels[this._currentLevel].objects;
-            this._render.setLevel();
+            this._stage.back = this._levels[this._currentLevel].back;
+            this._stage.backShapes = (this._levels[this._currentLevel - 1] && this._levels[this._currentLevel - 1].objects) ? this._levels[this._currentLevel - 1].objects : undefined;
+            this._stage.shapes = this._levels[this._currentLevel].objects;
+            this._stage.setLevel();
             this._leftMenu[2].children[2].content = (this._currentLevel !== 0) ? this._currentLevel : -1;
         } else {
             console.warn(`Level ${value} not exist`);
@@ -40,17 +40,17 @@ export class Stages {
     }
 
     private loadProject(): void {
-        this._render.cancelCreateWallHandler();
+        this._stage.cancelCreateWallHandler();
         FileHelper.loadProject((e: any) => {
             const fileContent: string = e.target.result;
-            this._levels = JsonConverter.getLevels(fileContent, this._render);
+            this._levels = JsonConverter.getLevels(fileContent, this._stage);
             this.initMenu();
             this.selectLevel(1);
         });
     }
     /*  TODO: replace saveHack
         private saveProject(): void {
-            this._render.cancelCreateWallHandler();
+            this._stage.cancelCreateWallHandler();
             FileHelper.saveProject(this._levels);
         }
         */
@@ -62,7 +62,7 @@ export class Stages {
         input.type = 'submit';
         form.appendChild(input);
         form.onsubmit = (e: Event) => {
-            this._render.cancelCreateWallHandler();
+            this._stage.cancelCreateWallHandler();
             const data: string = DataConverter.getJson(this._levels);
             e.preventDefault();
             const foo: any = (window as any).saveAs;
@@ -78,7 +78,7 @@ export class Stages {
     }
 
     private newProject(): void {
-        this._render.cancelCreateWallHandler();
+        this._stage.cancelCreateWallHandler();
         this._levels = new Array();
         this._currentLevel = 0;
         this.addLevel();
@@ -90,7 +90,7 @@ export class Stages {
     }
 
     private initStartMenu(): void {
-        this._startMenu = this._render.drawStart();
+        this._startMenu = this._stage.drawStart();
 
         this._startMenu.children[1].content = 'Создать проект';
         this._startMenu.children[2].onClick = () => this.createProject();
@@ -116,7 +116,7 @@ export class Stages {
     */
 
     private addLevel(increase: boolean = true): void {
-        this._render.cancelCreateWallHandler();
+        this._stage.cancelCreateWallHandler();
         const newFloorNumber: number = this._currentLevel + (increase ? 1 : -1);
         this._levels[newFloorNumber] = {
             floorNumber: newFloorNumber,
@@ -130,16 +130,16 @@ export class Stages {
     private _topMenu: TopMenu;
 
     private initMenu(): void {
-        this._render.mouseDetect();
+        this._stage.mouseDetect();
         this._startMenu.remove();
         // Call (menu create) order not to change
-        this._topMenu = new TopMenu(this._render);
-        this._leftMenu = this._render.createLeftMenu(5);
+        this._topMenu = new TopMenu(this._stage);
+        this._leftMenu = this._stage.createLeftMenu(5);
 
         this._leftMenu[0].onClick = () => this.addLevel();
         this._leftMenu[1].onClick = () => this.selectLevel(this._currentLevel + 1);
         this._leftMenu[2].children[2].content = '1';
-        this._leftMenu[2].onClick = () => this._render.setZeroOffset();
+        this._leftMenu[2].onClick = () => this._stage.setZeroOffset();
         this._leftMenu[3].onClick = () => this.selectLevel(this._currentLevel - 1);
         this._leftMenu[4].onClick = () => this.addLevel(false);
 
@@ -151,8 +151,8 @@ export class Stages {
             this._levels[this._currentLevel].back.img);
 
         this._topMenu.setFnBackgroundRemove((): void => {
-            this._render.delBack();
-            this._render.back = this._levels[this._currentLevel].back = new ShapeBack();
+            this._stage.delBack();
+            this._stage.back = this._levels[this._currentLevel].back = new ShapeBack();
         });
     }
 }

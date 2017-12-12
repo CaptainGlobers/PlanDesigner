@@ -1,4 +1,4 @@
-﻿import { Render } from '../Core/Render/Render';
+﻿import { Stage } from '../Core/Stage';
 import { IShape } from '../Core/Shapes/IShape';
 import { MathCalc } from '../Core/MathCalc';
 import { ColorConfig } from '../Core/Render/ColorConfig';
@@ -7,10 +7,10 @@ import { GraphicsSettings } from '../Core/Render/GraphicsSettings';
 export class Dialog {
     private _centerX: number = GraphicsSettings.current.center.x - 100;
     private _dialogHelper: HTMLElement;
-    private _render: Render;
+    private _stage: Stage;
 
-    constructor(render: Render) {
-        this._render = render;
+    constructor(stage: Stage) {
+        this._stage = stage;
     }
 
     public create(): HTMLElement {
@@ -48,7 +48,7 @@ export class Dialog {
                 menuContainer.parentElement.removeChild(menuContainer);
                 this._dialogHelper = undefined;
                 item.callback();
-                this._render.reDraw();
+                this._stage.reDraw();
             };
             text.onmouseenter = () => {
                 text.style.backgroundColor = ColorConfig.dialog;
@@ -87,13 +87,13 @@ export class Dialog {
                     callback: () => this.contextMenu(event, subMenu)
                 }, {
                     text: 'Разделить стену',
-                    callback: () => this._render.splitWall(shape)
+                    callback: () => this._stage.splitWall(shape)
                 }, {
                     text: 'Изменить параметры',
                     callback: () => this.createDialog(event, shape, (shapeItem: IShape, input: HTMLInputElement) => MathCalc.setShapeLength(shapeItem, Math.round(parseFloat(input.value))))
                 }, {
                     text: 'Удалить',
-                    callback: () => this._render.deleteShape(shape)
+                    callback: () => this._stage.deleteShape(shape)
                 }, {
                     text: 'Закрыть',
                     callback: () => { }
@@ -111,7 +111,7 @@ export class Dialog {
                     callback: () => this.createDialog2(callback, shape)
                 }, {
                     text: 'Удалить',
-                    callback: () => this._render.deleteShape(shape)
+                    callback: () => this._stage.deleteShape(shape)
                 }, {
                     text: 'Закрыть',
                     callback: () => { }
@@ -154,7 +154,7 @@ export class Dialog {
             div.parentElement.removeChild(div);
             this._dialogHelper = undefined;
             clickFn(shape, input);
-            this._render.reDraw();
+            this._stage.reDraw();
         };
 
         div.appendChild(button);
@@ -231,7 +231,7 @@ export class Dialog {
             shape.height = parseInt(input2.value, 10);
             shape.plane = parseInt(input3.value, 10);
             callback();
-            this._render.reDraw();
+            this._stage.reDraw();
         };
 
         div.appendChild(button);

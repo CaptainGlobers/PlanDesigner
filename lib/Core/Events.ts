@@ -1,19 +1,15 @@
-import { Render } from './Render/Render';
-
 export class Events {
     private _mouseMoveListenerPool: Array<EventListener> = new Array();
     private _mouseDownListenerPool: Array<EventListener> = new Array();
-    private _render: Render;
 
-    constructor(render: Render) {
-        this._render = render;
+    constructor() {
         paper.project.activeLayer.onMouseMove = (event: any) => this.mouseMoveListenerCall(event);
         paper.project.activeLayer.onMouseDown = (event: any) => this.mouseDownListenerCall(event);
     }
 
     private mouseMoveListenerCall(event: any): void {
         if (this._mouseMoveListenerPool.length > 0) {
-            this._mouseMoveListenerPool.forEach((listener: any) => listener(event, this._render));
+            this._mouseMoveListenerPool.forEach((listener: any) => listener(event));
         }
     }
 
@@ -35,7 +31,7 @@ export class Events {
 
     private mouseDownListenerCall(event: any): void {
         if (this._mouseDownListenerPool.length > 0) {
-            this._mouseDownListenerPool.forEach((listener: any) => listener(event, this._render));
+            this._mouseDownListenerPool.forEach((listener: any) => listener(event));
         }
     }
 

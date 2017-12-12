@@ -2,13 +2,13 @@ import { IPoint, Point } from '../Primitive/Primitive';
 import { ILevel } from '../ILevel';
 import { IShape } from '../Shapes/IShape';
 import { Shape } from '../Shapes/Shape';
-import { Render } from '../Render/Render';
+import { Stage } from '../Stage';
 import { MathCalc } from '../MathCalc';
 import { ShapeBack } from '../Shapes/ShapeBack';
 
 export class JsonConverter {
 
-    public static getLevels(dto: string, render: Render): Array<ILevel> {
+    public static getLevels(dto: string, render: Stage): Array<ILevel> {
         const data: any = JSON.parse(dto);
         const zeroPoint: IPoint = new Point(data.offset[0], data.offset[1]);
         const result: Array<ILevel> = [];
@@ -23,7 +23,7 @@ export class JsonConverter {
         return result;
     }
 
-    private static getObjects(objectsI: Array<any>, parent: IShape, render: Render, zeroPoint: IPoint): Array<IShape> {
+    private static getObjects(objectsI: Array<any>, parent: IShape, stage: Stage, zeroPoint: IPoint): Array<IShape> {
         const result: Array<IShape> = new Array();
         if (objectsI) {
             objectsI.forEach((object: any) => {
@@ -43,10 +43,10 @@ export class JsonConverter {
                     shape.height = object.height;
                     shape.width = width * 10;
                 }
-                render.createShapeControlsAndRender(shape, true);
+                stage.createShapeControlsAndRender(shape, true);
                 result.push(shape);
                 if (object.children) {
-                    JsonConverter.getObjects(object.children, shape, render, zeroPoint);
+                    JsonConverter.getObjects(object.children, shape, stage, zeroPoint);
                 }
             });
         }
