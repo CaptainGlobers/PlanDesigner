@@ -4,22 +4,15 @@ import { MathCalc } from '../MathCalc';
 import { IShape } from '../Shapes/IShape';
 import { ShapeDesignerHelper } from './ShapeDesignerHelper';
 import { ColorConfig } from './ColorConfig';
-import { ShapeBack } from '../Shapes/ShapeBack';
+import { BackgroundShape } from '../Shapes/ShapeBack';
 
 export class ShapeDesigner {
-    public originalPosition(x: number, y: number): IPoint {
-        return MathCalc.getPosition(x, y, 1 / this.zoom, this.center);
-    }
 
-    public newPosition(x: number, y: number): IPoint {
-        return MathCalc.getPosition(x, y, this.zoom, this.center);
-    }
-
-    public drawGrid(shape: IShape, windowWidth: number, windowHeight: number): void {
-        const offsetX: number = this.offset.x - Math.round(windowWidth / 2) - 3;
-        const offsetY: number = this.offset.y - Math.round(windowHeight / 2) - 5;
-        const high: number = (this.zoom > 1.5) ? 50 : 100;
-        const width: number = (this.zoom > 1.5) ? 50 : 100;
+    public static drawGrid(shape: IShape, windowWidth: number, windowHeight: number): void {
+        const offsetX: number = ShapeDesigner.offset.x - Math.round(windowWidth / 2) - 3;
+        const offsetY: number = ShapeDesigner.offset.y - Math.round(windowHeight / 2) - 5;
+        const high: number = (ShapeDesigner.zoom > 1.5) ? 50 : 100;
+        const width: number = (ShapeDesigner.zoom > 1.5) ? 50 : 100;
         const pool: Array<IPath> = [];
         const widthElement: number = Math.round(2 * windowWidth / width);
         const highElement: number = Math.round(2 * windowHeight / high);
@@ -28,14 +21,14 @@ export class ShapeDesigner {
 
         for (let i: number = 0; i <= widthElement; i++) {
             pool.push(ShapeDesignerHelper.drawGridLine(
-                this.newPosition(i * width + 0.5 + offsetX, + 0.5 + offsetY),
-                this.newPosition(i * width + 0.5 + offsetX, highLength + 0.5 + offsetY)
+                GraphicsSettings.current.newPosition(i * width + 0.5 + offsetX, + 0.5 + offsetY),
+                GraphicsSettings.current.newPosition(i * width + 0.5 + offsetX, highLength + 0.5 + offsetY)
             ));
         }
         for (let i: number = 0; i <= highElement; i++) {
             pool.push(ShapeDesignerHelper.drawGridLine(
-                this.newPosition(0.5 + offsetX, i * high + 0.5 + offsetY),
-                this.newPosition(widthLength + 0.5 + offsetX, i * high + 0.5 + offsetY)
+                GraphicsSettings.current.newPosition(0.5 + offsetX, i * high + 0.5 + offsetY),
+                GraphicsSettings.current.newPosition(widthLength + 0.5 + offsetX, i * high + 0.5 + offsetY)
             ));
         }
 
@@ -48,22 +41,22 @@ export class ShapeDesigner {
         shape.point1 = new Point(group.position.x, group.position.y);
     }
 
-    public drawControl(shape: IShape): void {
-        this.drawSquare(shape, 8, ColorConfig.control);
+    public static drawControl(shape: IShape): void {
+        ShapeDesigner.drawSquare(shape, 8, ColorConfig.control);
     }
 
-    public drawColumn(shape: IShape): void {
-        this.drawSquare(shape, 20, ColorConfig.column);
+    public static drawColumn(shape: IShape): void {
+        ShapeDesigner.drawSquare(shape, 20, ColorConfig.column);
     }
 
-    private drawSquare(
+    private static drawSquare(
         shape: IShape,
         size: number,
         fillColor: IColor | string
     ): void {
-        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
-        const width: number = size * this.zoom;
-        const length: number = size * this.zoom;
+        const point1: IPoint = GraphicsSettings.current.newPosition(shape.point1.x + ShapeDesigner.offset.x, shape.point1.y + ShapeDesigner.offset.y);
+        const width: number = size * ShapeDesigner.zoom;
+        const length: number = size * ShapeDesigner.zoom;
 
         const rect: IPath =
             ShapeDesignerHelper.createRectangle(point1, width, length, fillColor, 0);
@@ -78,11 +71,11 @@ export class ShapeDesigner {
         }
     }
 
-    public drawWall(shape: IShape, color: IColor, desiredWidth: number): void {
-        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
-        const point2: IPoint = this.newPosition(shape.point2.x + this.offset.x, shape.point2.y + this.offset.y);
+    public static drawWall(shape: IShape, color: IColor, desiredWidth: number): void {
+        const point1: IPoint = GraphicsSettings.current.newPosition(shape.point1.x + ShapeDesigner.offset.x, shape.point1.y + ShapeDesigner.offset.y);
+        const point2: IPoint = GraphicsSettings.current.newPosition(shape.point2.x + ShapeDesigner.offset.x, shape.point2.y + ShapeDesigner.offset.y);
         const vector: IPoint = new Point(point2.x - point1.x, point2.y - point1.y);
-        const width: number = desiredWidth * this.zoom;
+        const width: number = desiredWidth * ShapeDesigner.zoom;
         const length: number = point2.getDistance(point1, false);
 
         const rect: IPath =
@@ -111,14 +104,14 @@ export class ShapeDesigner {
         };
     }
 
-    public drawShapeOnWall(shape: IShape, color2: IColor): void {
+    public static drawShapeOnWall(shape: IShape, color2: IColor): void {
         // TODO: duplicate drawWall
-        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
-        const point2: IPoint = this.newPosition(shape.point2.x + this.offset.x, shape.point2.y + this.offset.y);
+        const point1: IPoint = GraphicsSettings.current.newPosition(shape.point1.x + ShapeDesigner.offset.x, shape.point1.y + ShapeDesigner.offset.y);
+        const point2: IPoint = GraphicsSettings.current.newPosition(shape.point2.x + ShapeDesigner.offset.x, shape.point2.y + ShapeDesigner.offset.y);
         const vector: IPoint = new Point(point2.x - point1.x, point2.y - point1.y);
-        const width: number = 20 * this.zoom;
-        const smallWidth: number = 8 * this.zoom;
-        const length: number = shape.width / 10 * this.zoom;
+        const width: number = 20 * ShapeDesigner.zoom;
+        const smallWidth: number = 8 * ShapeDesigner.zoom;
+        const length: number = shape.width / 10 * ShapeDesigner.zoom;
 
         const rect: IPath =
             ShapeDesignerHelper.createRectangle(point1, width, length, ColorConfig.black, vector.angle - 90);
@@ -145,12 +138,11 @@ export class ShapeDesigner {
         }
     }
 
-    public drawBack(shape: ShapeBack): void {
+    public static drawBack(shape: BackgroundShape): void {
+        shape.point1 = GraphicsSettings.current.originalPosition(ShapeDesigner.center.x - ShapeDesigner.offset.x * ShapeDesigner.zoom, ShapeDesigner.center.y - ShapeDesigner.offset.y * ShapeDesigner.zoom);
 
-        shape.point1 = this.originalPosition(this.center.x - this.offset.x * this.zoom, this.center.y - this.offset.y * this.zoom);
-
-        const point1: IPoint = this.newPosition(shape.point1.x + this.offset.x, shape.point1.y + this.offset.y);
-        const icon: IRaster = Raster.create(shape.img, point1, this.zoom * shape.scale);
+        const point1: IPoint = GraphicsSettings.current.newPosition(shape.point1.x + ShapeDesigner.offset.x, shape.point1.y + ShapeDesigner.offset.y);
+        const icon: IRaster = Raster.create(shape.img, point1, ShapeDesigner.zoom * shape.scale);
 
         if (shape.renderObject) {
             shape.renderObject.children[0].remove();
@@ -164,14 +156,14 @@ export class ShapeDesigner {
         }
     }
 
-    // ------------------------------
-    private get zoom(): number {
+    // TODO: Refactor GraphicsSettings
+    private static get zoom(): number {
         return GraphicsSettings.current.zoom;
     }
-    private get center(): IPoint {
+    private static get center(): IPoint {
         return GraphicsSettings.current.center;
     }
-    private get offset(): IPoint {
+    private static get offset(): IPoint {
         return GraphicsSettings.current.offset;
     }
 

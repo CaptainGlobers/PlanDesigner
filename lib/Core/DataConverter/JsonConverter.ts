@@ -4,7 +4,7 @@ import { IShape } from '../Shapes/IShape';
 import { Shape } from '../Shapes/Shape';
 import { Stage } from '../Stage';
 import { MathCalc } from '../MathCalc';
-import { ShapeBack } from '../Shapes/ShapeBack';
+import { BackgroundShape } from '../Shapes/ShapeBack';
 
 export class JsonConverter {
 
@@ -16,7 +16,7 @@ export class JsonConverter {
             result[level.floorNumber] = {
                 floorNumber: level.floorNumber,
                 objects: JsonConverter.getObjects(level.objects, undefined, render, zeroPoint),
-                back: new ShapeBack()
+                back: new BackgroundShape()
             };
         });
 

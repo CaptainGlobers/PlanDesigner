@@ -116,7 +116,7 @@ export class StageMoveController {
         this._canvas.addEventListener('mousewheel', (event: WheelEvent) => this._wheelListener(event), false);
     }
 
-    //////
+    // TODO: Refactor GraphicsSettings
     private get zoom(): number {
         return GraphicsSettings.current.zoom;
     }

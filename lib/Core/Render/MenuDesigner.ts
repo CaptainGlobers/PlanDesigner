@@ -4,18 +4,16 @@ import { GraphicsSettings } from './GraphicsSettings';
 
 export class MenuDesigner {
 
-    private _menuGroup: IGroup;
-
-    public drawMenu(count: number, width: number, hight: number): Array<IGroup> {
+    public static drawMenu(count: number, width: number, hight: number): Array<IGroup> {
         const menu: IPath = Path.Rectangle(new Point(0, 0), new Point(width, 40));
         menu.fillColor = ColorConfig.button;
 
         // TODO: del dependencies
-        this._menuGroup = new Group([menu]);
+        const menuGroup: IGroup = new Group([menu]);
         // TODO: del dependencies
         GraphicsSettings.current.menu = menu;
 
-        return MenuDesigner.drawMenuItemInner(count, width, hight, menu, this._menuGroup);
+        return MenuDesigner.drawMenuItemInner(count, width, hight, menu, menuGroup);
     }
 
     private static drawMenuItemInner(count: number, width: number, hight: number, menu: any, menuGroup: IGroup): Array<IGroup> {
@@ -67,11 +65,11 @@ export class MenuDesigner {
         return menuItem;
     }
 
-    public drawLeftMenu(count: number): Array<IGroup> {
-        return MenuDesigner.drawLeftMenuInner(count, this._menuGroup);
+    public static drawLeftMenu(count: number): Array<IGroup> {
+        return MenuDesigner.drawLeftMenuInner(count);
     }
 
-    private static drawLeftMenuInner(count: number, menuGroup: IGroup): Array<IGroup> {
+    private static drawLeftMenuInner(count: number): Array<IGroup> {
         const menu: Array<IGroup> = [];
         const point1: IPoint = new Point(0, 120);
         const margin: number = 0;
@@ -92,7 +90,6 @@ export class MenuDesigner {
                 document.body.style.cursor = 'default';
             };
 
-            group.insertAbove(menuGroup);
             menu.push(group);
             point1.y = point1.y + margin + heightItem;
         }

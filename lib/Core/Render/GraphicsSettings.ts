@@ -1,5 +1,6 @@
 import { IShape } from '../Shapes/IShape';
 import { IPoint, IPath, IGroup, Point } from '../Primitive/Primitive';
+import { MathCalc } from '../MathCalc';
 
 export class GraphicsSettings {
     public static readonly current: GraphicsSettings = new GraphicsSettings();
@@ -24,6 +25,10 @@ export class GraphicsSettings {
 
     public insertBelowGrid(renderObject: IGroup): void {
         renderObject.insertBelow(this._grid.renderObject);
+    }
+
+    public moveAboveGrid(path: IPath): void {
+        (path as any).moveAbove(this._grid.renderObject);
     }
 
     public insertAboveMenu(shape: IShape, renderObject?: IGroup): void {
@@ -64,6 +69,14 @@ export class GraphicsSettings {
     }
     public set center(value: IPoint) {
         this._center = value;
+    }
+
+    public originalPosition(x: number, y: number): IPoint {
+        return MathCalc.getPosition(x, y, 1 / this.zoom, this.center);
+    }
+
+    public newPosition(x: number, y: number): IPoint {
+        return MathCalc.getPosition(x, y, this.zoom, this.center);
     }
 
 }

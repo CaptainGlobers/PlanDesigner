@@ -55,7 +55,7 @@ export class TopMenu {
             this._stage.cancelCreateWallHandler();
             if (!this._hasBackground()) {
                 const loadSuccess: Function = () => this.showBackMenu();
-                this._stage.loadBack(loadSuccess);
+                this._stage.loadBackground(loadSuccess);
             } else {
                 alert('Удалите текущую подложку');
             }

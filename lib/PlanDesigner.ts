@@ -1,16 +1,19 @@
 import { ILevel } from './Core/ILevel';
 import { Stage } from './Core/Stage';
 import { JsonConverter } from './Core/DataConverter/JsonConverter';
-import { ShapeBack } from './Core/Shapes/ShapeBack';
+import { BackgroundShape } from './Core/Shapes/ShapeBack';
 import { TopMenu } from './UI/TopMenu';
-import { FileHelper } from './FileHelper';
+import { FileHelper } from './Core/FileHelper';
 import { DataConverter } from './Core/DataConverter/DataConverter';
+import { LeftMenu } from './UI/LeftMenu';
+import { IShape } from './Core/Shapes/IShape';
 
 export class PlanDesigner {
     private _levels: Array<ILevel>;
     private _stage: Stage;
     private _startMenu: any;
-    private _leftMenu: any;
+    private _topMenu: TopMenu;
+    private _leftMenu: LeftMenu;
     private _currentLevel: number = 0;
 
     constructor(stageContainer: HTMLElement) {
@@ -29,11 +32,14 @@ export class PlanDesigner {
             } else {
                 this._topMenu.hideBackMenu();
             }
-            this._stage.back = this._levels[this._currentLevel].back;
-            this._stage.backShapes = (this._levels[this._currentLevel - 1] && this._levels[this._currentLevel - 1].objects) ? this._levels[this._currentLevel - 1].objects : undefined;
+            this.updateBackground();
+            const backgroundShapes: Array<IShape> =
+                (this._levels[this._currentLevel - 1] && this._levels[this._currentLevel - 1].objects)
+                    ? this._levels[this._currentLevel - 1].objects : undefined;
+            this._stage.setBackgroundShapes(backgroundShapes);
             this._stage.shapes = this._levels[this._currentLevel].objects;
             this._stage.setLevel();
-            this._leftMenu[2].children[2].content = (this._currentLevel !== 0) ? this._currentLevel : -1;
+            this._leftMenu.floorNumber = (this._currentLevel !== 0) ? this._currentLevel : -1;
         } else {
             console.warn(`Level ${value} not exist`);
         }
@@ -121,38 +127,37 @@ export class PlanDesigner {
         this._levels[newFloorNumber] = {
             floorNumber: newFloorNumber,
             objects: new Array(),
-            back: new ShapeBack()
+            back: new BackgroundShape()
         };
 
         this.selectLevel(newFloorNumber);
     }
 
-    private _topMenu: TopMenu;
+    private updateBackground(isNew?: boolean): void {
+        if (isNew) {
+            this._stage.delBack();
+            this._levels[this._currentLevel].back = new BackgroundShape();
+        }
+        this._stage.setBackground(this._levels[this._currentLevel].back);
+    }
 
     private initMenu(): void {
         this._stage.mouseDetect();
         this._startMenu.remove();
-        // Call (menu create) order not to change
+
         this._topMenu = new TopMenu(this._stage);
-        this._leftMenu = this._stage.createLeftMenu(5);
-
-        this._leftMenu[0].onClick = () => this.addLevel();
-        this._leftMenu[1].onClick = () => this.selectLevel(this._currentLevel + 1);
-        this._leftMenu[2].children[2].content = '1';
-        this._leftMenu[2].onClick = () => this._stage.setZeroOffset();
-        this._leftMenu[3].onClick = () => this.selectLevel(this._currentLevel - 1);
-        this._leftMenu[4].onClick = () => this.addLevel(false);
-
         this._topMenu.setFnNewProject((): void => this.newProject());
         // this._topMenu.setFnSaveProject((): void => this.saveProject());
         this._topMenu.setFnLoadProject((): void => this.loadProject());
+        this._topMenu.setFnHasBackground((): boolean => this._levels[this._currentLevel].back.img);
+        this._topMenu.setFnBackgroundRemove((): void => this.updateBackground(true));
 
-        this._topMenu.setFnHasBackground((): boolean =>
-            this._levels[this._currentLevel].back.img);
-
-        this._topMenu.setFnBackgroundRemove((): void => {
-            this._stage.delBack();
-            this._stage.back = this._levels[this._currentLevel].back = new ShapeBack();
-        });
+        this._leftMenu = new LeftMenu(this._stage);
+        this._leftMenu.setButtonAction(0, () => this.addLevel());
+        this._leftMenu.setButtonAction(1, () => this.selectLevel(this._currentLevel + 1));
+        this._leftMenu.setButtonAction(2, () => this._stage.setZeroOffset());
+        this._leftMenu.setButtonAction(3, () => this.selectLevel(this._currentLevel - 1));
+        this._leftMenu.setButtonAction(4, () => this.addLevel(false));
+        this._leftMenu.floorNumber = 1;
     }
 }
